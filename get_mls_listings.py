@@ -1,4 +1,4 @@
-from shared import *
+import shared
 
 from bs4 import BeautifulSoup
 
@@ -18,7 +18,7 @@ import sys
 
 
 def failure(web_driver):
-    log_message('Failed!')
+    shared.log_message('Failed!')
     web_driver.quit()
     sys.exit()
 
@@ -32,45 +32,45 @@ def wait_for_element(web_driver, xpath):
 
 
 def short_sleep():
-    sleep_norm_dist(3, 0.5, 1)
+    shared.sleep_norm_dist(3, 0.5, 1)
 
 
 def scrape():
     options = Options()
     options.headless = False
-    options.add_argument("--width=" + PARAMS['scrape']['width'])
-    options.add_argument("--height=" + PARAMS['scrape']['height'])
-    driver = webdriver.Firefox(options=options, executable_path=DRIVER_PATH,
-                               service_log_path=CONFIG['constant']['driver_log_file'])
+    options.add_argument("--width=" + shared.PARAMS['scrape']['width'])
+    options.add_argument("--height=" + shared.PARAMS['scrape']['height'])
+    driver = webdriver.Firefox(options=options, executable_path=shared.DRIVER_PATH,
+                               service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
-        driver.get(PARAMS['scrape']['url'])
+        driver.get(shared.PARAMS['scrape']['url'])
 
-        xpaths = PARAMS['xpath']
+        xpaths = shared.PARAMS['xpath']
 
-        sleep_norm_dist(5, 0.5, 3)
+        shared.sleep_norm_dist(5, 0.5, 3)
         wait_for_element(driver, xpaths['geolocation'])
-        driver.find_element_by_xpath(xpaths['geolocation']).send_keys(CONFIG['search']['geolocation'])
+        driver.find_element_by_xpath(xpaths['geolocation']).send_keys(shared.CONFIG['search']['geolocation'])
         short_sleep()
         wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
-        sleep_norm_dist(5, 0.5, 3)
+        shared.sleep_norm_dist(5, 0.5, 3)
         wait_for_element(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
         driver.execute_script("arguments[0].click();", filter_el)
-        sleep_norm_dist(5, 0.5, 3)
+        shared.sleep_norm_dist(5, 0.5, 3)
         wait_for_element(driver, xpaths['min_price'])
-        driver.find_element_by_xpath(xpaths['min_price']).send_keys(CONFIG['search']['min_price'])
+        driver.find_element_by_xpath(xpaths['min_price']).send_keys(shared.CONFIG['search']['min_price'])
         short_sleep()
         wait_for_element(driver, xpaths['max_price'])
-        driver.find_element_by_xpath(xpaths['max_price']).send_keys(CONFIG['search']['max_price'])
+        driver.find_element_by_xpath(xpaths['max_price']).send_keys(shared.CONFIG['search']['max_price'])
         short_sleep()
         wait_for_element(driver, xpaths['bedrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bedrooms_dropdown'])).select_by_visible_text(
-            CONFIG['search']['bedrooms_dropdown'])
+            shared.CONFIG['search']['bedrooms_dropdown'])
         short_sleep()
         wait_for_element(driver, xpaths['bathrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bathrooms_dropdown'])).select_by_visible_text(
-            CONFIG['search']['bathrooms_dropdown'])
+            shared.CONFIG['search']['bathrooms_dropdown'])
         short_sleep()
         wait_for_element(driver, xpaths['under_contract_checkbox'])
         under_contract_element = driver.find_element_by_xpath(xpaths['under_contract_checkbox'])
@@ -79,16 +79,16 @@ def scrape():
         wait_for_element(driver, xpaths['square_feet_dropdown'])
         sqft_el = driver.find_element_by_xpath(xpaths['square_feet_dropdown'])
         driver.execute_script("arguments[0].click();", sqft_el)
-        Select(sqft_el).select_by_visible_text(CONFIG['search']['square_feet_dropdown'])
+        Select(sqft_el).select_by_visible_text(shared.CONFIG['search']['square_feet_dropdown'])
         short_sleep()
         wait_for_element(driver, xpaths['acres_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['acres_dropdown'])).select_by_visible_text(
-            CONFIG['search']['acres_dropdown'])
+            shared.CONFIG['search']['acres_dropdown'])
         short_sleep()
         wait_for_element(driver, xpaths['update_search'])
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
-        sleep_norm_dist(5, 0.5, 3)
+        shared.sleep_norm_dist(5, 0.5, 3)
         page_source = driver.page_source
     finally:
         driver.quit()
@@ -96,13 +96,13 @@ def scrape():
 
 
 def update_cache():
-    if UPDATE_CACHE:
+    if shared.UPDATE_CACHE:
         source = scrape()
-        with open(CACHE_FILE, 'w') as file:
+        with open(shared.CACHE_FILE, 'w') as file:
             file.write(source)
-        log_message('Cache updated')
+        shared.log_message('Cache updated')
     else:
-        log_message('UPDATE_CACHE set to false')
+        shared.log_message('UPDATE_CACHE set to false')
 
 
 def extract_value(value):
@@ -111,19 +111,19 @@ def extract_value(value):
 
 
 def validate_listing(listing):
-    min_price = int(CONFIG['search']['min_price'])
+    min_price = int(shared.CONFIG['search']['min_price'])
     if listing.price < min_price:
         raise ValueError('Listing {} is less than ${:,}'.format(listing.mls_id, min_price))
-    max_price = int(CONFIG['search']['max_price'])
+    max_price = int(shared.CONFIG['search']['max_price'])
     if listing.price > max_price:
         raise ValueError('Listing {} is more than ${:,}'.format(listing.mls_id, max_price))
-    bedrooms = extract_value(CONFIG['search']['bedrooms_dropdown'])
+    bedrooms = extract_value(shared.CONFIG['search']['bedrooms_dropdown'])
     if listing.bedrooms < bedrooms:
         raise ValueError('Listing {} contains fewer than {} bedrooms'.format(listing.mls_id, bedrooms))
-    bathrooms = extract_value(CONFIG['search']['bathrooms_dropdown'])
+    bathrooms = extract_value(shared.CONFIG['search']['bathrooms_dropdown'])
     if listing.bathrooms < bathrooms:
         raise ValueError('Listing {} contains fewer than {} bathrooms'.format(listing.mls_id, bathrooms))
-    square_feet = extract_value(CONFIG['search']['square_feet_dropdown'])
+    square_feet = extract_value(shared.CONFIG['search']['square_feet_dropdown'])
     if listing.sqft < square_feet:
         raise ValueError('Listing {} is less than {} square feet'.format(listing.mls_id, square_feet))
 
@@ -135,39 +135,39 @@ def format_listings(listings):
 def parse_html(source):
     mls_listings = []
     mls_listings_dict = {
-        ACTIVE: [],
-        BACKUP_OFFER: [],
-        UNDER_CONTRACT: []
+        shared.ACTIVE: [],
+        shared.BACKUP_OFFER: [],
+        shared.UNDER_CONTRACT: []
     }
     soup = BeautifulSoup(source, 'html.parser')
     count = 0
-    for property_card in soup.select(PARAMS['selector']['property_card']):
+    for property_card in soup.select(shared.PARAMS['selector']['property_card']):
         if not ('class' in property_card.attrs and
-                PARAMS['selector']['property_card_class'] in property_card.attrs['class']):
+                shared.PARAMS['selector']['property_card_class'] in property_card.attrs['class']):
             continue
         count += 1
         mls = int(property_card.attrs['listno'])
-        openhouse_label_el = property_card.select_one(PARAMS['selector']['openhouse_label'])
+        openhouse_label_el = property_card.select_one(shared.PARAMS['selector']['openhouse_label'])
         if openhouse_label_el:
             open_house = openhouse_label_el.text
             open_house = " ".join(open_house.split())
         else:
             open_house = ''
-        property_details = property_card.select(PARAMS['selector']['property_details'])[0]
-        status = property_details.select_one(PARAMS['selector']['status']).contents[2].strip()
-        listing_details_el = property_details.select_one(PARAMS['selector']['listing_details'])
-        list_price_el = listing_details_el.select_one(PARAMS['selector']['list_price'])
+        property_details = property_card.select(shared.PARAMS['selector']['property_details'])[0]
+        status = property_details.select_one(shared.PARAMS['selector']['status']).contents[2].strip()
+        listing_details_el = property_details.select_one(shared.PARAMS['selector']['listing_details'])
+        list_price_el = listing_details_el.select_one(shared.PARAMS['selector']['list_price'])
         list_price_str = list_price_el.text
         list_price = int(money_parser.price_str(list_price_str))
         details_str = listing_details_el.contents[2].strip()
         bedrooms = int(re.match(r'^(\d+) bds .*', details_str).group(1))
         bathrooms = int(re.match(r'.* (\d+) ba .*', details_str).group(1))
         sqft = int(re.match(r'.* (\d+) SqFt\.$', details_str).group(1))
-        address = property_details.select_one(PARAMS['selector']['address']).text.strip()
+        address = property_details.select_one(shared.PARAMS['selector']['address']).text.strip()
         address = " ".join(address.split())
-        listing_agent = property_details.select_one(PARAMS['selector']['listing_agent']).text.strip()
+        listing_agent = property_details.select_one(shared.PARAMS['selector']['listing_agent']).text.strip()
         # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house']
-        listing = MLS(mls, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house)
+        listing = shared.MLS(mls, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house)
         validate_listing(listing)
         mls_listings.append(listing)
         mls_listings_dict[status].append(listing)
@@ -177,7 +177,7 @@ def parse_html(source):
 
 
 def parse_cache():
-    with open(CACHE_FILE, 'r') as file:
+    with open(shared.CACHE_FILE, 'r') as file:
         return parse_html(file.read())
 
 

@@ -4,6 +4,7 @@ from distutils.util import strtobool
 import os
 import random
 from recordclass import recordclass
+import shutil
 import sys
 import time
 
@@ -24,8 +25,13 @@ CONFIG = get_config()
 DRIVER_PATH = CONFIG['constant']['driver_path']
 UPDATE_CACHE = bool(strtobool(CONFIG['constant']['update_cache']))
 SEND_MESSAGE = bool(strtobool(CONFIG['constant']['send_message']))
-CACHE_FILE = CONFIG['constant']['cache_file']
-DB = CONFIG['constant']['db_file']
+CACHE_DIR = CONFIG['constant']['cache_dir']
+CACHE_FILE = os.path.join(CACHE_DIR, 'ure.html')
+CACHE_CHECKPOINT_DIR = os.path.join(CACHE_DIR, 'checkpoints')
+DB_DIR = CONFIG['constant']['db_dir']
+DB = os.path.join(DB_DIR, 'mls.db')
+DB_CHECKPOINT_DIR = os.path.join(DB_DIR, 'checkpoints')
+CHECKPOINT_COUNT = int(CONFIG['constant']['checkpoint_count'])
 
 
 def get_params():
@@ -58,7 +64,13 @@ def timestamp():
     return datetime.datetime.now().replace(microsecond=0).strftime('%y%m%dT%H%M%S')
 
 
-LOG_FILE = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(timestamp()))
+g_timestamp = timestamp()
+
+
+def update_timestamp():
+    global g_timestamp
+    g_timestamp = timestamp()
+    return g_timestamp
 
 
 def sleep_norm_dist(mu, sigma, min):
@@ -70,13 +82,29 @@ def sleep_norm_dist(mu, sigma, min):
 
 
 def log_message(msg):
+    log_path = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(g_timestamp))
     if type(msg) != str:
         msg = str(msg)
     full_msg = timestamp() + ' - ' + msg
-    if os.path.exists(LOG_FILE):
+    if os.path.exists(log_path):
         append_write = 'a'  # append if already exists
     else:
         append_write = 'w'  # make a new file if not
-    with open(LOG_FILE, append_write) as log_file:
+    with open(log_path, append_write) as log_file:
         log_file.write(full_msg + '\n')
     print(full_msg)
+
+
+def remove_old_files(directory):
+    checkpoint_files = sorted(os.listdir(directory), reverse=True)
+    if len(checkpoint_files) > CHECKPOINT_COUNT:
+        for old_file in checkpoint_files[CHECKPOINT_COUNT:]:
+            os.remove(old_file)
+
+
+def make_checkpoint(file, directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    checkpoint_path = os.path.join(directory, g_timestamp)
+    shutil.copy(file, checkpoint_path)
+    remove_old_files(directory)
