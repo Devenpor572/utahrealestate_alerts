@@ -35,6 +35,10 @@ def short_sleep():
     shared.sleep_norm_dist(3, 0.5, 1)
 
 
+def medium_sleep():
+    shared.sleep_norm_dist(10, 1, 5)
+
+
 def scrape():
     options = Options()
     options.headless = False
@@ -47,17 +51,17 @@ def scrape():
 
         xpaths = shared.PARAMS['xpath']
 
-        shared.sleep_norm_dist(5, 0.5, 3)
+        medium_sleep()
         wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(shared.CONFIG['search']['geolocation'])
         short_sleep()
         wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
-        shared.sleep_norm_dist(5, 0.5, 3)
+        medium_sleep()
         wait_for_element(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
         driver.execute_script("arguments[0].click();", filter_el)
-        shared.sleep_norm_dist(5, 0.5, 3)
+        medium_sleep()
         wait_for_element(driver, xpaths['min_price'])
         driver.find_element_by_xpath(xpaths['min_price']).send_keys(shared.CONFIG['search']['min_price'])
         short_sleep()
@@ -88,7 +92,7 @@ def scrape():
         wait_for_element(driver, xpaths['update_search'])
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
-        shared.sleep_norm_dist(5, 0.5, 3)
+        medium_sleep()
         page_source = driver.page_source
     finally:
         driver.quit()
