@@ -58,6 +58,10 @@ def scrape():
         wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
         medium_sleep()
+        results = driver.find_elements_by_xpath(xpaths['cookie_close_banner'])
+        if results and len(results) == 1:
+            driver.execute_script("arguments[0].click();", results[0])
+        short_sleep()
         wait_for_element(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
         driver.execute_script("arguments[0].click();", filter_el)
