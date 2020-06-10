@@ -18,6 +18,7 @@ def update_db_new_listings(current, current_dict, previous, previous_dict):
     all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT, shared.OFF_MARKET])
     new_listing_ids = all_current - all_previous
     if new_listing_ids:
+        shared.log_message('New listings: {}'.format(', '.join(new_listing_ids)))
         db.insert_rows([current[1][new_mls_num] for new_mls_num in new_listing_ids])
 
 
@@ -53,18 +54,25 @@ def send_email(current, current_dict, previous, previous_dict):
     price_drop_ids = dict()
     open_house_ids = dict()
     for existing_id in existing_ids:
+        prepend = 'MLS #{}: '.format(existing_id)
         # If the listing has become more available than previously
         if current[1][existing_id].status not in [shared.UNDER_CONTRACT, shared.OFF_MARKET] \
                 and LISTING_STATE_DICT[current[1][existing_id].status] < LISTING_STATE_DICT[previous[1][existing_id].status]:
-            more_available_ids[existing_id] = 'Availability Change: {} -> {}'.format(previous[1][existing_id].status,
-                                                                                     current[1][existing_id].status)
+            message = 'Availability Change: {} -> {}'.format(previous[1][existing_id].status,
+                                                             current[1][existing_id].status)
+            shared.log_message(prepend + message)
+            more_available_ids[existing_id] = message
         # If the listing has had a price drop
         elif current[1][existing_id].price < previous[1][existing_id].price:
-            price_drop_ids[existing_id] = 'Price Drop: ${:,} -> ${:,}'.format(previous[1][existing_id].price,
-                                                                              current[1][existing_id].price)
-            # If the listing has a new open house
+            message = 'Price Drop: ${:,} -> ${:,}'.format(previous[1][existing_id].price,
+                                                          current[1][existing_id].price)
+            shared.log_message(prepend + message)
+            price_drop_ids[existing_id] = message
+        # If the listing has a new open house
         elif current[1][existing_id].open_house and not previous[1][existing_id].open_house:
-            open_house_ids[existing_id] = 'New open house: {}'.format(current[1][existing_id].open_house)
+            message = 'New open house: {}'.format(current[1][existing_id].open_house)
+            shared.log_message(prepend + message)
+            open_house_ids[existing_id] = message
     if new_listing_ids or more_available_ids or price_drop_ids or open_house_ids:
         email_manager.generate_and_send_email(current[1], new_listing_ids, more_available_ids, price_drop_ids, open_house_ids)
     else:
@@ -95,11 +103,9 @@ def loop_sleep():
 
 
 def main_loop():
-    loop_num = 0
     while True:
         for i in range(5):
             try:
-                loop_num += 1
                 shared.update_timestamp()
                 shared.log_message('Begin {}'.format(shared.g_timestamp))
                 update_and_alert()
@@ -113,4 +119,5 @@ def main_loop():
         loop_sleep()
 
 
-main_loop()
+if __name__ == '__main__':
+    main_loop()

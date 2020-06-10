@@ -64,6 +64,7 @@ def timestamp():
     return datetime.datetime.now().replace(microsecond=0).strftime('%y%m%dT%H%M%S')
 
 
+CONST_TIMESTAMP = timestamp()
 g_timestamp = timestamp()
 
 
@@ -82,7 +83,7 @@ def sleep_norm_dist(mu, sigma, min):
 
 
 def log_message(msg):
-    log_path = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(g_timestamp))
+    log_path = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(CONST_TIMESTAMP))
     if type(msg) != str:
         msg = str(msg)
     full_msg = timestamp() + ' - ' + msg
