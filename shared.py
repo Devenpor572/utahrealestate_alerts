@@ -26,7 +26,7 @@ DRIVER_PATH = CONFIG['constant']['driver_path']
 UPDATE_CACHE = bool(strtobool(CONFIG['constant']['update_cache']))
 SEND_MESSAGE = bool(strtobool(CONFIG['constant']['send_message']))
 CACHE_DIR = CONFIG['constant']['cache_dir']
-CACHE_FILE = os.path.join(CACHE_DIR, 'ure.html')
+CACHE_CURRENT_DIR = os.path.join(CACHE_DIR, 'current')
 CACHE_CHECKPOINT_DIR = os.path.join(CACHE_DIR, 'checkpoints')
 DB_DIR = CONFIG['constant']['db_dir']
 DB = os.path.join(DB_DIR, 'mls.db')
@@ -58,6 +58,7 @@ ACTIVE = PARAMS['str']['active']
 BACKUP_OFFER = PARAMS['str']['backup_offer']
 UNDER_CONTRACT = PARAMS['str']['under_contract']
 OFF_MARKET = PARAMS['str']['off_market']
+STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
 
 
 def timestamp():
@@ -100,12 +101,19 @@ def remove_old_files(directory):
     checkpoint_files = sorted(os.listdir(directory), reverse=True)
     if len(checkpoint_files) > CHECKPOINT_COUNT:
         for old_file in checkpoint_files[CHECKPOINT_COUNT:]:
-            os.remove(old_file)
+            old_file_path = os.path.join(directory, old_file)
+            if os.path.isdir(old_file_path):
+                shutil.rmtree(old_file_path)
+            else:
+                os.remove(old_file_path)
 
 
 def make_checkpoint(file, directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
     checkpoint_path = os.path.join(directory, g_timestamp)
-    shutil.copy(file, checkpoint_path)
+    if os.path.isdir(file):
+        shutil.copytree(file, checkpoint_path)
+    else:
+        shutil.copy(file, checkpoint_path)
     remove_old_files(directory)

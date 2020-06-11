@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 import money_parser
 
+import os
 import re
 import sys
 
@@ -97,17 +98,31 @@ def scrape():
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
         medium_sleep()
-        page_source = driver.page_source
+        page_sources = [driver.page_source]
+        results = driver.find_elements_by_xpath(xpaths['next_button'])
+        while results:
+            driver.execute_script("arguments[0].click();", results[0])
+            medium_sleep()
+            page_sources.append(driver.page_source)
+            results = driver.find_elements_by_xpath(xpaths['next_button'])
+
     finally:
         driver.quit()
-    return page_source
+    return page_sources
+
+
+def match_cache_file(file):
+    return re.match(r'.*_(\d+)\.html', file)
 
 
 def update_cache():
     if shared.UPDATE_CACHE:
-        source = scrape()
-        with open(shared.CACHE_FILE, 'w') as file:
-            file.write(source)
+        sources = scrape()
+        for file in os.listdir(shared.CACHE_CURRENT_DIR):
+            os.remove(os.path.join(shared.CACHE_CURRENT_DIR, file))
+        for i, source in enumerate(sources):
+            with open(os.path.join(shared.CACHE_CURRENT_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
+                file.write(source)
         shared.log_message('Cache updated')
     else:
         shared.log_message('UPDATE_CACHE set to false')
@@ -134,10 +149,6 @@ def validate_listing(listing):
     square_feet = extract_value(shared.CONFIG['search']['square_feet_dropdown'])
     if listing.sqft < square_feet:
         raise ValueError('Listing {} is less than {} square feet'.format(listing.mls_id, square_feet))
-
-
-def format_listings(listings):
-    return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}
 
 
 def parse_html(source):
@@ -181,17 +192,38 @@ def parse_html(source):
         mls_listings_dict[status].append(listing)
     if count == 0:
         raise ValueError('No listings found')
-    return format_listings(mls_listings), {key: format_listings(value) for key, value in mls_listings_dict.items()}
+    # return format_listings(mls_listings), {key: format_listings(value) for key, value in mls_listings_dict.items()}
+    return mls_listings, mls_listings_dict
 
 
 def parse_cache():
-    with open(shared.CACHE_FILE, 'r') as file:
-        return parse_html(file.read())
+    parsed_files = list()
+    for filename in sorted(os.listdir(shared.CACHE_CURRENT_DIR)):
+        with open(os.path.join(shared.CACHE_CURRENT_DIR, filename), 'r') as file:
+            parsed_files.append(parse_html(file.read()))
+    return parsed_files
+
+
+def format_listings(listings):
+    return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}
+
+
+def combine_parsed_results(results):
+    all_mls_listings = list()
+    all_mls_listings_dict = {status: list() for status in shared.STATUSES}
+    for result in results:
+        mls_listings, mls_listings_dict = result
+        all_mls_listings += mls_listings
+        for status in shared.STATUSES:
+            if status in mls_listings_dict:
+                all_mls_listings_dict[status] += mls_listings_dict[status]
+    return format_listings(all_mls_listings), {key: format_listings(value)
+                                               for key, value in all_mls_listings_dict.items()}
 
 
 def get_mls_listings():
     update_cache()
-    return parse_cache()
+    return combine_parsed_results(parse_cache())
 
 
 def test():

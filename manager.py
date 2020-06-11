@@ -15,10 +15,10 @@ def get_all_set(listing_dict, statuses):
 def update_db_new_listings(current, current_dict, previous, previous_dict):
     # New listings includes all current listings that are not previous listings
     all_current = get_all_set(current_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT])
-    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT, shared.OFF_MARKET])
+    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT,
+                                               shared.OFF_MARKET])
     new_listing_ids = all_current - all_previous
     if new_listing_ids:
-        shared.log_message('New listings: {}'.format(', '.join(new_listing_ids)))
         db.insert_rows([current[1][new_mls_num] for new_mls_num in new_listing_ids])
 
 
@@ -37,7 +37,8 @@ def update_db_off_market(current, current_dict, previous, previous_dict):
 def update_db(current, current_dict, previous, previous_dict):
     # All listings in both current and previous
     all_current = get_all_set(current_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT])
-    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT, shared.OFF_MARKET])
+    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT,
+                                               shared.OFF_MARKET])
     existing_ids = all_current.intersection(all_previous)
     if existing_ids:
         for existing_id in existing_ids:
@@ -47,8 +48,11 @@ def update_db(current, current_dict, previous, previous_dict):
 def send_email(current, current_dict, previous, previous_dict):
     # New listings includes all current listings that are not previous listings
     all_current = get_all_set(current_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT])
-    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT, shared.OFF_MARKET])
-    new_listing_ids = all_current - all_previous
+    all_previous = get_all_set(previous_dict, [shared.ACTIVE, shared.BACKUP_OFFER, shared.UNDER_CONTRACT,
+                                               shared.OFF_MARKET])
+    new_listing_ids = [mls for mls in all_current - all_previous if current[1][mls].status in [shared.ACTIVE]]
+    if new_listing_ids:
+        shared.log_message('New listings: {}'.format(', '.join(map(str, new_listing_ids))))
     existing_ids = all_current.intersection(all_previous)
     more_available_ids = dict()
     price_drop_ids = dict()
@@ -110,7 +114,7 @@ def main_loop():
                 shared.log_message('Begin {}'.format(shared.g_timestamp))
                 update_and_alert()
                 shared.log_message('End {}'.format(shared.g_timestamp))
-                shared.make_checkpoint(shared.CACHE_FILE, shared.CACHE_CHECKPOINT_DIR)
+                shared.make_checkpoint(shared.CACHE_CURRENT_DIR, shared.CACHE_CHECKPOINT_DIR)
                 shared.make_checkpoint(shared.DB, shared.DB_CHECKPOINT_DIR)
                 break
             except:
