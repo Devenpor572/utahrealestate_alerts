@@ -45,8 +45,18 @@ def scrape():
     options.headless = False
     options.add_argument("--width=" + shared.PARAMS['scrape']['width'])
     options.add_argument("--height=" + shared.PARAMS['scrape']['height'])
-    driver = webdriver.Firefox(options=options, executable_path=shared.DRIVER_PATH,
-                               service_log_path=shared.CONFIG['constant']['driver_log_file'])
+    if 'firefox_profile' in shared.CONFIG:
+        firefox_profile = webdriver.FirefoxProfile()
+        for key, value in shared.CONFIG['firefox_profile'].items():
+            firefox_profile.set_preference(key, int(value))
+        driver = webdriver.Firefox(firefox_profile=firefox_profile,
+                                   options=options,
+                                   executable_path=shared.DRIVER_PATH,
+                                   service_log_path=shared.CONFIG['constant']['driver_log_file'])
+    else:
+        driver = webdriver.Firefox(options=options,
+                                   executable_path=shared.DRIVER_PATH,
+                                   service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
         driver.get(shared.PARAMS['scrape']['url'])
 
