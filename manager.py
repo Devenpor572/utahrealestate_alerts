@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import shared
 import db_manager as db
 import get_mls_listings
