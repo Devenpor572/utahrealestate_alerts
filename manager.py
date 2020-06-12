@@ -4,7 +4,7 @@ import db_manager as db
 import get_mls_listings
 import email_manager
 
-import sys
+import traceback
 
 LISTING_STATE_DICT = {shared.ACTIVE: 0, shared.BACKUP_OFFER: 1, shared.UNDER_CONTRACT: 2, shared.OFF_MARKET: 3}
 
@@ -119,7 +119,7 @@ def main_loop():
                 shared.make_checkpoint(shared.DB, shared.DB_CHECKPOINT_DIR)
                 break
             except:
-                shared.log_message(sys.exc_info())
+                shared.log_message(traceback.format_exc())
                 short_loop_sleep()
         loop_sleep()
 
