@@ -23,7 +23,8 @@ def create_db():
           'bathrooms INT, ' \
           'sqft INT, ' \
           'agent VARCHAR(255), ' \
-          'open_house VARCHAR(255)' \
+          'open_house VARCHAR(255),' \
+          'source VARCHAR(255)' \
           ');'
     conn.execute(sql)
     conn.commit()
@@ -32,14 +33,14 @@ def create_db():
 
 def insert_row(row):
     conn = sqlite3.connect(shared.DB)
-    conn.execute('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?)', row)
+    conn.execute('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?)', row)
     conn.commit()
     conn.close()
 
 
 def insert_rows(rows):
     conn = sqlite3.connect(shared.DB)
-    conn.executemany('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?)', rows)
+    conn.executemany('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?)', rows)
     conn.commit()
     conn.close()
 
@@ -55,27 +56,32 @@ def update_row(row):
           "bathrooms='{5}', " \
           "sqft='{6}', " \
           "agent='{7}', " \
-          "open_house='{8}' "\
+          "open_house='{8}', "\
+          "source='{9}' "\
           "WHERE mls_id='{0}'".format(*row)
     conn.execute(sql)
     conn.commit()
     conn.close()
 
 
-def get_db_mls_listings_status(status=None):
+def get_db_listings_source_status(source, status=None):
     conn = sqlite3.connect(shared.DB)
-    sql = 'SELECT * FROM mls'
+    sql = "SELECT * FROM mls WHERE source='{}'".format(source)
     if status is not None:
-        sql += " WHERE status='{}'".format(status)
+        sql += " AND status='{}'".format(status)
     rows = conn.execute(sql).fetchall()
     conn.close()
     listings = [shared.MLS(*row) for row in rows]
     return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}
 
 
-def get_db_mls_listings():
-    return get_db_mls_listings_status(), \
-           {shared.ACTIVE: get_db_mls_listings_status(shared.ACTIVE),
-            shared.BACKUP_OFFER: get_db_mls_listings_status(shared.BACKUP_OFFER),
-            shared.UNDER_CONTRACT: get_db_mls_listings_status(shared.UNDER_CONTRACT),
-            shared.OFF_MARKET: get_db_mls_listings_status(shared.OFF_MARKET)}
+def get_db_listings_source(source):
+    return get_db_listings_source_status(source), \
+           {shared.ACTIVE: get_db_listings_source_status(source, shared.ACTIVE),
+            shared.BACKUP_OFFER: get_db_listings_source_status(source, shared.BACKUP_OFFER),
+            shared.UNDER_CONTRACT: get_db_listings_source_status(source, shared.UNDER_CONTRACT),
+            shared.OFF_MARKET: get_db_listings_source_status(source, shared.OFF_MARKET)}
+
+
+def get_db_listings():
+    return get_db_listings_source(shared.SOURCE_URE)

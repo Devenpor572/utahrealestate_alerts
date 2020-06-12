@@ -195,8 +195,9 @@ def parse_html(source):
         address = property_details.select_one(shared.PARAMS['selector']['address']).text.strip()
         address = " ".join(address.split())
         listing_agent = property_details.select_one(shared.PARAMS['selector']['listing_agent']).text.strip()
-        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house']
-        listing = shared.MLS(mls, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house)
+        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house', 'source']
+        listing = shared.MLS(mls, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house,
+                             shared.SOURCE_URE)
         validate_listing(listing)
         mls_listings.append(listing)
         mls_listings_dict[status].append(listing)

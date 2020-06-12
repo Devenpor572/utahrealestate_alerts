@@ -52,13 +52,16 @@ MLS = recordclass('MLS', ['mls_id',
                           'bathrooms',
                           'sqft',
                           'agent',
-                          'open_house'])
+                          'open_house',
+                          'source'])
 
 ACTIVE = PARAMS['str']['active']
 BACKUP_OFFER = PARAMS['str']['backup_offer']
 UNDER_CONTRACT = PARAMS['str']['under_contract']
 OFF_MARKET = PARAMS['str']['off_market']
 STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
+
+SOURCE_URE = 'ure'
 
 
 def timestamp():

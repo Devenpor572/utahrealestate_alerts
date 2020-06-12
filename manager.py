@@ -87,7 +87,7 @@ def send_email(current, current_dict, previous, previous_dict):
 def update_and_alert():
     current, current_dict = get_mls_listings.get_mls_listings()
     if db.db_exists():
-        previous, previous_dict = db.get_db_mls_listings()
+        previous, previous_dict = db.get_db_listings()
         update_db_new_listings(current, current_dict, previous, previous_dict)
         update_db_off_market(current, current_dict, previous, previous_dict)
         update_db(current, current_dict, previous, previous_dict)
