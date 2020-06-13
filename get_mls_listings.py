@@ -58,6 +58,7 @@ def scrape():
                                    executable_path=shared.DRIVER_PATH,
                                    service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
+        driver.set_page_load_timeout(60)
         driver.get(shared.PARAMS['scrape']['url'])
 
         xpaths = shared.PARAMS['xpath']
