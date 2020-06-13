@@ -46,7 +46,7 @@ def scrape():
                                    executable_path=shared.DRIVER_PATH,
                                    service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
-        driver.set_page_load_timeout(60)
+        driver.set_page_load_timeout(int(shared.CONFIG['search']['driver_timeout']))
         driver.get(shared.CONFIG['search'][shared.SOURCE_KSL])
         shared.wait_for_element(driver, '//*[@id="search-app"]')
         scroll_down(driver)
