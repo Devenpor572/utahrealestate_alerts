@@ -1,3 +1,7 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.ui import WebDriverWait
+
 import configparser
 import datetime
 from distutils.util import strtobool
@@ -120,3 +124,16 @@ def make_checkpoint(file, directory):
     else:
         shutil.copy(file, checkpoint_path)
     remove_old_files(directory)
+
+
+def wait_for_element(web_driver, xpath):
+    WebDriverWait(web_driver, 60).until(
+        expected_conditions.presence_of_element_located((By.XPATH, xpath)))
+
+
+def short_sleep():
+    sleep_norm_dist(3, 0.5, 1)
+
+
+def medium_sleep():
+    sleep_norm_dist(10, 1, 5)

@@ -3,41 +3,14 @@ import shared
 from bs4 import BeautifulSoup
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
 
 import money_parser
 
 import os
 import re
-import sys
-
-
-def failure(web_driver):
-    shared.log_message('Failed!')
-    web_driver.quit()
-    sys.exit()
-
-
-def wait_for_element(web_driver, xpath):
-    try:
-        WebDriverWait(web_driver, 60).until(
-            expected_conditions.presence_of_element_located((By.XPATH, xpath)))
-    except TimeoutException:
-        failure(web_driver)
-
-
-def short_sleep():
-    shared.sleep_norm_dist(3, 0.5, 1)
-
-
-def medium_sleep():
-    shared.sleep_norm_dist(10, 1, 5)
 
 
 def scrape():
@@ -63,60 +36,59 @@ def scrape():
 
         xpaths = shared.PARAMS['xpath']
 
-        medium_sleep()
-        wait_for_element(driver, xpaths['geolocation'])
+        shared.medium_sleep()
+        shared.wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(shared.CONFIG['search']['geolocation'])
-        short_sleep()
-        wait_for_element(driver, xpaths['geolocation'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
-        medium_sleep()
+        shared.medium_sleep()
         results = driver.find_elements_by_xpath(xpaths['cookie_close_banner'])
         if results and len(results) == 1:
             driver.execute_script("arguments[0].click();", results[0])
-        short_sleep()
-        wait_for_element(driver, xpaths['filter'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
         driver.execute_script("arguments[0].click();", filter_el)
-        medium_sleep()
-        wait_for_element(driver, xpaths['min_price'])
+        shared.medium_sleep()
+        shared.wait_for_element(driver, xpaths['min_price'])
         driver.find_element_by_xpath(xpaths['min_price']).send_keys(shared.CONFIG['search']['min_price'])
-        short_sleep()
-        wait_for_element(driver, xpaths['max_price'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['max_price'])
         driver.find_element_by_xpath(xpaths['max_price']).send_keys(shared.CONFIG['search']['max_price'])
-        short_sleep()
-        wait_for_element(driver, xpaths['bedrooms_dropdown'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['bedrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bedrooms_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['bedrooms_dropdown'])
-        short_sleep()
-        wait_for_element(driver, xpaths['bathrooms_dropdown'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['bathrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bathrooms_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['bathrooms_dropdown'])
-        short_sleep()
-        wait_for_element(driver, xpaths['under_contract_checkbox'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['under_contract_checkbox'])
         under_contract_element = driver.find_element_by_xpath(xpaths['under_contract_checkbox'])
         driver.execute_script("arguments[0].click();", under_contract_element)
-        short_sleep()
-        wait_for_element(driver, xpaths['square_feet_dropdown'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['square_feet_dropdown'])
         sqft_el = driver.find_element_by_xpath(xpaths['square_feet_dropdown'])
         driver.execute_script("arguments[0].click();", sqft_el)
         Select(sqft_el).select_by_visible_text(shared.CONFIG['search']['square_feet_dropdown'])
-        short_sleep()
-        wait_for_element(driver, xpaths['acres_dropdown'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['acres_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['acres_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['acres_dropdown'])
-        short_sleep()
-        wait_for_element(driver, xpaths['update_search'])
+        shared.short_sleep()
+        shared.wait_for_element(driver, xpaths['update_search'])
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
-        medium_sleep()
+        shared.medium_sleep()
         page_sources = [driver.page_source]
         results = driver.find_elements_by_xpath(xpaths['next_button'])
         while results:
             driver.execute_script("arguments[0].click();", results[0])
-            medium_sleep()
+            shared.medium_sleep()
             page_sources.append(driver.page_source)
             results = driver.find_elements_by_xpath(xpaths['next_button'])
-
     finally:
         driver.quit()
     return page_sources
@@ -204,7 +176,6 @@ def parse_html(source):
         mls_listings_dict[status].append(listing)
     if count == 0:
         raise ValueError('No listings found')
-    # return format_listings(mls_listings), {key: format_listings(value) for key, value in mls_listings_dict.items()}
     return mls_listings, mls_listings_dict
 
 
