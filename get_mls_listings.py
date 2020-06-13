@@ -101,10 +101,10 @@ def match_cache_file(file):
 def update_cache():
     if shared.UPDATE_CACHE:
         sources = scrape()
-        for file in os.listdir(shared.CACHE_CURRENT_DIR):
-            os.remove(os.path.join(shared.CACHE_CURRENT_DIR, file))
+        for file in os.listdir(shared.CACHE_CURRENT_URE_DIR):
+            os.remove(os.path.join(shared.CACHE_CURRENT_URE_DIR, file))
         for i, source in enumerate(sources):
-            with open(os.path.join(shared.CACHE_CURRENT_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
+            with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
                 file.write(source)
         shared.log_message('Cache updated')
     else:
@@ -181,8 +181,8 @@ def parse_html(source):
 
 def parse_cache():
     parsed_files = list()
-    for filename in sorted(os.listdir(shared.CACHE_CURRENT_DIR)):
-        with open(os.path.join(shared.CACHE_CURRENT_DIR, filename), 'r') as file:
+    for filename in sorted(os.listdir(shared.CACHE_CURRENT_URE_DIR)):
+        with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, filename), 'r') as file:
             parsed_files.append(parse_html(file.read()))
     return parsed_files
 

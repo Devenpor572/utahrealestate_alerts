@@ -19,18 +19,22 @@ def get_config():
     else:
         config_path = 'config.ini'
     assert(os.path.exists(config_path))
+    print('Using config path {}'.format(os.path.join(os.getcwd(), config_path)))
     config = configparser.ConfigParser()
     config.read(config_path)
     return config
 
 
-def make_dirs(directories):
-    for directory in directories:
-        if not os.path.exists(directory):
-            os.makedirs(directory)
+def get_params():
+    params_path = CONFIG['constant']['params_file']
+    assert (os.path.exists(params_path))
+    params = configparser.ConfigParser()
+    params.read(params_path)
+    return params
 
 
 CONFIG = get_config()
+PARAMS = get_params()
 
 DRIVER_PATH = CONFIG['constant']['driver_path']
 UPDATE_CACHE = bool(strtobool(CONFIG['constant']['update_cache']))
@@ -43,18 +47,14 @@ DB = os.path.join(DB_DIR, 'mls.db')
 DB_CHECKPOINT_DIR = os.path.join(DB_DIR, 'checkpoints')
 CHECKPOINT_COUNT = int(CONFIG['constant']['checkpoint_count'])
 
-make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR])
+ACTIVE = PARAMS['str']['active']
+BACKUP_OFFER = PARAMS['str']['backup_offer']
+UNDER_CONTRACT = PARAMS['str']['under_contract']
+OFF_MARKET = PARAMS['str']['off_market']
+STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
 
-
-def get_params():
-    params_path = CONFIG['constant']['params_file']
-    assert (os.path.exists(params_path))
-    params = configparser.ConfigParser()
-    params.read(params_path)
-    return params
-
-
-PARAMS = get_params()
+SOURCE_URE = 'ure'
+CACHE_CURRENT_URE_DIR = os.path.join(CACHE_CURRENT_DIR, SOURCE_URE)
 
 MLS = recordclass('MLS', ['mls_id',
                           'address',
@@ -67,13 +67,14 @@ MLS = recordclass('MLS', ['mls_id',
                           'open_house',
                           'source'])
 
-ACTIVE = PARAMS['str']['active']
-BACKUP_OFFER = PARAMS['str']['backup_offer']
-UNDER_CONTRACT = PARAMS['str']['under_contract']
-OFF_MARKET = PARAMS['str']['off_market']
-STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
 
-SOURCE_URE = 'ure'
+def make_dirs(directories):
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+
+make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR])
 
 
 def timestamp():
