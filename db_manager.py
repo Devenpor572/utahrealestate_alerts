@@ -64,24 +64,20 @@ def update_row(row):
     conn.close()
 
 
-def get_db_listings_source_status(source, status=None):
+def get_db_listings_source_status(status=None):
     conn = sqlite3.connect(shared.DB)
-    sql = "SELECT * FROM mls WHERE source='{}'".format(source)
+    sql = "SELECT * FROM mls"
     if status is not None:
-        sql += " AND status='{}'".format(status)
+        sql += " WHERE status='{}'".format(status)
     rows = conn.execute(sql).fetchall()
     conn.close()
     listings = [shared.MLS(*row) for row in rows]
     return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}
 
 
-def get_db_listings_source(source):
-    return get_db_listings_source_status(source), \
-           {shared.ACTIVE: get_db_listings_source_status(source, shared.ACTIVE),
-            shared.BACKUP_OFFER: get_db_listings_source_status(source, shared.BACKUP_OFFER),
-            shared.UNDER_CONTRACT: get_db_listings_source_status(source, shared.UNDER_CONTRACT),
-            shared.OFF_MARKET: get_db_listings_source_status(source, shared.OFF_MARKET)}
-
-
 def get_db_listings():
-    return get_db_listings_source(shared.SOURCE_URE)
+    return get_db_listings_source_status(), \
+           {shared.ACTIVE: get_db_listings_source_status(shared.ACTIVE),
+            shared.BACKUP_OFFER: get_db_listings_source_status(shared.BACKUP_OFFER),
+            shared.UNDER_CONTRACT: get_db_listings_source_status(shared.UNDER_CONTRACT),
+            shared.OFF_MARKET: get_db_listings_source_status(shared.OFF_MARKET)}

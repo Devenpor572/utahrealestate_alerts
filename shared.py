@@ -54,7 +54,9 @@ OFF_MARKET = PARAMS['str']['off_market']
 STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
 
 SOURCE_URE = 'ure'
+SOURCE_KSL = 'ksl'
 CACHE_CURRENT_URE_DIR = os.path.join(CACHE_CURRENT_DIR, SOURCE_URE)
+CACHE_CURRENT_KSL_DIR = os.path.join(CACHE_CURRENT_DIR, SOURCE_KSL)
 
 MLS = recordclass('MLS', ['mls_id',
                           'address',
@@ -74,7 +76,7 @@ def make_dirs(directories):
             os.makedirs(directory)
 
 
-make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR])
+make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR])
 
 
 def timestamp():
@@ -146,3 +148,7 @@ def short_sleep():
 
 def medium_sleep():
     sleep_norm_dist(10, 1, 5)
+
+
+def format_listings(listings):
+    return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}

@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import shared
 import db_manager as db
-import get_mls_listings
+import ksl_scraper
+import ure_scraper
 import email_manager
 
 import traceback
@@ -85,7 +86,12 @@ def send_email(current, current_dict, previous, previous_dict):
 
 
 def update_and_alert():
-    current, current_dict = get_mls_listings.get_mls_listings()
+    ksl_results = ksl_scraper.get_mls_listings()
+    ure_results = ure_scraper.get_mls_listings()
+    results = ure_results + ksl_results
+    results_dict = {status: [result for result in results if result.status == status] for status in shared.STATUSES}
+    current = shared.format_listings(results)
+    current_dict = {key: shared.format_listings(value) for key, value in results_dict.items()}
     if db.db_exists():
         previous, previous_dict = db.get_db_listings()
         update_db_new_listings(current, current_dict, previous, previous_dict)

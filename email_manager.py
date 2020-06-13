@@ -14,8 +14,8 @@ def current_time():
 
 
 def format_html_listing(el, listing, optional=None):
-    link_el = ET.SubElement(el, 'a', {'href': shared.PARAMS['str']['url'] + str(listing.mls_id)})
-    link_el.text = shared.PARAMS['str']['url'] + str(listing.mls_id)
+    link_el = ET.SubElement(el, 'a', {'href': shared.PARAMS['str'][listing.source] + str(listing.mls_id)})
+    link_el.text = shared.PARAMS['str'][listing.source] + str(listing.mls_id)
     list_el = ET.SubElement(el, 'ul')
     if optional:
         optional_el = ET.SubElement(list_el, 'li')
@@ -50,7 +50,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         title_el.text = 'New in Cache County, Utah'
         list_el = ET.SubElement(body_el, 'ul')
         for new_mls_num in new_listing_ids:
-            text += '\n - ' + shared.PARAMS['str']['url'] + str(new_mls_num)
+            text += '\n - ' + shared.PARAMS['str'][listings[new_mls_num].source] + str(new_mls_num)
             li = ET.SubElement(list_el, 'li')
             format_html_listing(li, listings[new_mls_num])
     if more_available_ids:
@@ -59,7 +59,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         title_el.text = 'Available again in Cache County, Utah'
         list_el = ET.SubElement(body_el, 'ul')
         for more_availabe_id in more_available_ids.keys():
-            text += '\n - ' + shared.PARAMS['str']['url'] + str(more_availabe_id)
+            text += '\n - ' + shared.PARAMS['str'][listings[more_availabe_id].source] + str(more_availabe_id)
             text += '\n\t - ' + more_available_ids[more_availabe_id]
             li = ET.SubElement(list_el, 'li')
             format_html_listing(li, listings[more_availabe_id], more_available_ids[more_availabe_id])
@@ -69,7 +69,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         title_el.text = 'Price drop in Cache County, Utah'
         list_el = ET.SubElement(body_el, 'ul')
         for price_drop_id in price_drop_ids.keys():
-            text += '\n - ' + shared.PARAMS['str']['url'] + str(price_drop_id)
+            text += '\n - ' + shared.PARAMS['str'][listings[price_drop_id].source] + str(price_drop_id)
             text += '\n\t - ' + price_drop_ids[price_drop_id]
             li = ET.SubElement(list_el, 'li')
             format_html_listing(li, listings[price_drop_id], price_drop_ids[price_drop_id])
@@ -79,7 +79,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         title_el.text = 'Open house in Cache County, Utah'
         list_el = ET.SubElement(body_el, 'ul')
         for open_house_id in open_house_ids.keys():
-            text += '\n - ' + shared.PARAMS['str']['url'] + str(open_house_id)
+            text += '\n - ' + shared.PARAMS['str'][listings[open_house_id].source] + str(open_house_id)
             text += '\n\t - ' + open_house_ids[open_house_id]
             li = ET.SubElement(list_el, 'li')
             format_html_listing(li, listings[open_house_id], open_house_ids[open_house_id])

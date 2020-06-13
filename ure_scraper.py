@@ -32,7 +32,7 @@ def scrape():
                                    service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
         driver.set_page_load_timeout(60)
-        driver.get(shared.PARAMS['scrape']['url'])
+        driver.get(shared.PARAMS['scrape']['ure'])
 
         xpaths = shared.PARAMS['xpath']
 
@@ -106,7 +106,7 @@ def update_cache():
         for i, source in enumerate(sources):
             with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
                 file.write(source)
-        shared.log_message('Cache updated')
+        shared.log_message('URE cache updated')
     else:
         shared.log_message('UPDATE_CACHE set to false')
 
@@ -136,11 +136,6 @@ def validate_listing(listing):
 
 def parse_html(source):
     mls_listings = []
-    mls_listings_dict = {
-        shared.ACTIVE: [],
-        shared.BACKUP_OFFER: [],
-        shared.UNDER_CONTRACT: []
-    }
     soup = BeautifulSoup(source, 'html.parser')
     count = 0
     for property_card in soup.select(shared.PARAMS['selector']['property_card']):
@@ -173,10 +168,9 @@ def parse_html(source):
                              shared.SOURCE_URE)
         validate_listing(listing)
         mls_listings.append(listing)
-        mls_listings_dict[status].append(listing)
     if count == 0:
         raise ValueError('No listings found')
-    return mls_listings, mls_listings_dict
+    return mls_listings
 
 
 def parse_cache():
@@ -184,29 +178,12 @@ def parse_cache():
     for filename in sorted(os.listdir(shared.CACHE_CURRENT_URE_DIR)):
         with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, filename), 'r') as file:
             parsed_files.append(parse_html(file.read()))
-    return parsed_files
-
-
-def format_listings(listings):
-    return {listing.mls_id for listing in listings}, {listing.mls_id: listing for listing in listings}
-
-
-def combine_parsed_results(results):
-    all_mls_listings = list()
-    all_mls_listings_dict = {status: list() for status in shared.STATUSES}
-    for result in results:
-        mls_listings, mls_listings_dict = result
-        all_mls_listings += mls_listings
-        for status in shared.STATUSES:
-            if status in mls_listings_dict:
-                all_mls_listings_dict[status] += mls_listings_dict[status]
-    return format_listings(all_mls_listings), {key: format_listings(value)
-                                               for key, value in all_mls_listings_dict.items()}
+    return [item for sublist in parsed_files for item in sublist]
 
 
 def get_mls_listings():
     update_cache()
-    return combine_parsed_results(parse_cache())
+    return parse_cache()
 
 
 def test():
