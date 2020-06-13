@@ -36,8 +36,8 @@ def scrape():
     firefox_profile = webdriver.FirefoxProfile()
     for file in os.listdir(shared.EXTENSIONS_DIR):
         firefox_profile.add_extension(extension=os.path.join(shared.EXTENSIONS_DIR, file))
-    if 'firefox_profile' in shared.CONFIG:
-        for key, value in shared.CONFIG['firefox_profile'].items():
+    if 'firefox_profile_ksl' in shared.CONFIG:
+        for key, value in shared.CONFIG['firefox_profile_ksl'].items():
             firefox_profile.set_preference(key, int(value))
     driver = webdriver.Firefox(firefox_profile=firefox_profile,
                                options=options,
