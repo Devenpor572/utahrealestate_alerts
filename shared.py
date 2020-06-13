@@ -24,6 +24,12 @@ def get_config():
     return config
 
 
+def make_dirs(directories):
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+
+
 CONFIG = get_config()
 
 DRIVER_PATH = CONFIG['constant']['driver_path']
@@ -36,6 +42,8 @@ DB_DIR = CONFIG['constant']['db_dir']
 DB = os.path.join(DB_DIR, 'mls.db')
 DB_CHECKPOINT_DIR = os.path.join(DB_DIR, 'checkpoints')
 CHECKPOINT_COUNT = int(CONFIG['constant']['checkpoint_count'])
+
+make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR])
 
 
 def get_params():
