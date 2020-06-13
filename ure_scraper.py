@@ -18,18 +18,16 @@ def scrape():
     options.headless = False
     options.add_argument("--width=" + shared.PARAMS['scrape']['width'])
     options.add_argument("--height=" + shared.PARAMS['scrape']['height'])
+    firefox_profile = webdriver.FirefoxProfile()
+    for file in os.listdir(shared.EXTENSIONS_DIR):
+        firefox_profile.add_extension(extension=os.path.join(shared.EXTENSIONS_DIR, file))
     if 'firefox_profile' in shared.CONFIG:
-        firefox_profile = webdriver.FirefoxProfile()
         for key, value in shared.CONFIG['firefox_profile'].items():
             firefox_profile.set_preference(key, int(value))
-        driver = webdriver.Firefox(firefox_profile=firefox_profile,
-                                   options=options,
-                                   executable_path=shared.DRIVER_PATH,
-                                   service_log_path=shared.CONFIG['constant']['driver_log_file'])
-    else:
-        driver = webdriver.Firefox(options=options,
-                                   executable_path=shared.DRIVER_PATH,
-                                   service_log_path=shared.CONFIG['constant']['driver_log_file'])
+    driver = webdriver.Firefox(firefox_profile=firefox_profile,
+                               options=options,
+                               executable_path=shared.DRIVER_PATH,
+                               service_log_path=shared.CONFIG['constant']['driver_log_file'])
     try:
         driver.set_page_load_timeout(int(shared.CONFIG['search']['driver_timeout']))
         driver.get(shared.PARAMS['scrape']['ure'])

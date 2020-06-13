@@ -46,6 +46,7 @@ DB_DIR = CONFIG['constant']['db_dir']
 DB = os.path.join(DB_DIR, 'mls.db')
 DB_CHECKPOINT_DIR = os.path.join(DB_DIR, 'checkpoints')
 CHECKPOINT_COUNT = int(CONFIG['constant']['checkpoint_count'])
+EXTENSIONS_DIR = CONFIG['search']['extensions_dir']
 
 ACTIVE = PARAMS['str']['active']
 BACKUP_OFFER = PARAMS['str']['backup_offer']
@@ -76,7 +77,7 @@ def make_dirs(directories):
             os.makedirs(directory)
 
 
-make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR])
+make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR, EXTENSIONS_DIR])
 
 
 def timestamp():
