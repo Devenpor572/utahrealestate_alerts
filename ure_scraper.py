@@ -22,6 +22,7 @@ def get_next(driver):
     return result
 
 
+
 def scrape():
     options = Options()
     options.headless = shared.HEADLESS
@@ -75,6 +76,7 @@ def scrape():
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
         shared.wait_for_element_visible(driver, xpaths['results_listings'])
+        shared.wait_for_invisible(driver, xpaths['results_spin_wrap'])
         page_sources = [driver.page_source]
         result = get_next(driver)
         while result:

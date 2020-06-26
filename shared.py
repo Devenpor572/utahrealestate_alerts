@@ -153,6 +153,11 @@ def wait_for_element_visible(web_driver, xpath, timeout=60):
     wait_for_visible(web_driver, element, timeout)
 
 
+def wait_for_invisible(web_driver, xpath, timeout=60):
+    WebDriverWait(web_driver, timeout).until(
+        expected_conditions.invisibility_of_element_located((By.XPATH, xpath)))
+
+
 def short_sleep():
     sleep_norm_dist(3, 0.5, 1)
 
