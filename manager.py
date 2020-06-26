@@ -5,6 +5,7 @@ import ksl_scraper
 import ure_scraper
 import email_manager
 
+import sys
 import traceback
 
 LISTING_STATE_DICT = {shared.ACTIVE: 0, shared.BACKUP_OFFER: 1, shared.UNDER_CONTRACT: 2, shared.OFF_MARKET: 3}
@@ -109,26 +110,26 @@ def short_loop_sleep():
     shared.sleep_norm_dist(60, 10, 15)
 
 
-def loop_sleep():
-    shared.sleep_norm_dist(900, 120, 300)
-
-
-def main_loop():
-    while True:
-        for i in range(5):
-            try:
-                shared.update_timestamp()
-                shared.log_message('Begin {}'.format(shared.g_timestamp))
-                update_and_alert()
-                shared.log_message('End {}'.format(shared.g_timestamp))
-                shared.make_checkpoint(shared.CACHE_CURRENT_DIR, shared.CACHE_CHECKPOINT_DIR)
-                shared.make_checkpoint(shared.DB, shared.DB_CHECKPOINT_DIR)
-                break
-            except:
-                shared.log_message(traceback.format_exc())
-                short_loop_sleep()
-        loop_sleep()
+def update():
+    passed = False
+    for i in range(5):
+        try:
+            shared.update_timestamp()
+            shared.log_message('Begin {}'.format(shared.g_timestamp))
+            update_and_alert()
+            shared.log_message('End {}'.format(shared.g_timestamp))
+            shared.make_checkpoint(shared.CACHE_CURRENT_DIR, shared.CACHE_CHECKPOINT_DIR)
+            shared.make_checkpoint(shared.DB, shared.DB_CHECKPOINT_DIR)
+            passed = True
+            break
+        except:
+            shared.log_message(traceback.format_exc())
+            short_loop_sleep()
+    return passed
 
 
 if __name__ == '__main__':
-    main_loop()
+    if not update():
+        sys.exit(1)
+    else:
+        sys.exit(0)
