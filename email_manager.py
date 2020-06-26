@@ -37,6 +37,30 @@ def format_html_listing(el, listing, optional=None):
     return el
 
 
+def format_html_search_parameters(el):
+    ET.SubElement(el, 'hr')
+    ET.SubElement(el, 'h3').text = 'Search parameters'
+    search_params_ul_el = ET.SubElement(el, 'ul')
+    ure_li_el = ET.SubElement(search_params_ul_el, 'li')
+    ure_subtitle_el = ET.SubElement(ure_li_el, 'h4')
+    ure_subtitle_el.text = 'Utah Real Estate - '
+    ure_a_el = ET.SubElement(ure_subtitle_el, 'a', {'href': shared.PARAMS['scrape']['ure']})
+    ure_a_el.text = 'Link'
+    ure_details_ul_el = ET.SubElement(ure_li_el, 'ul')
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Location query: {shared.CONFIG["search"]["geolocation"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Min Price: {shared.CONFIG["search"]["min_price"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Max Price: {shared.CONFIG["search"]["max_price"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Bedrooms: {shared.CONFIG["search"]["bedrooms_dropdown"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Bathrooms: {shared.CONFIG["search"]["bathrooms_dropdown"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Square Feet: {shared.CONFIG["search"]["square_feet_dropdown"]}'
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Acres: {shared.CONFIG["search"]["acres_dropdown"]}'
+    ksl_li_el = ET.SubElement(search_params_ul_el, 'li')
+    ksl_subtitle_el = ET.SubElement(ksl_li_el, 'h4')
+    ksl_subtitle_el.text = 'KSL Classifieds - '
+    ET.SubElement(ksl_subtitle_el, 'a', {'href': shared.CONFIG['search']['ksl']}).text = 'Link'
+    return el
+
+
 def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop_ids, open_house_ids):
     message = MIMEMultipart("alternative")
     title = 'Utah Real Estate Update {}'.format(current_time())
@@ -83,6 +107,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
             text += '\n\t - ' + open_house_ids[open_house_id]
             li = ET.SubElement(list_el, 'li')
             format_html_listing(li, listings[open_house_id], open_house_ids[open_house_id])
+    format_html_search_parameters(body_el)
     message.attach(MIMEText(text, "plain"))
     message.attach(MIMEText(xml.dom.minidom.parseString(ET.tostring(html_el)).toprettyxml(), "html"))
     return message
