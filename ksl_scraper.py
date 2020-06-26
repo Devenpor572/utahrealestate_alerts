@@ -30,7 +30,7 @@ def scroll_down(driver):
 
 def scrape():
     options = Options()
-    options.headless = False
+    options.headless = shared.HEADLESS
     options.add_argument("--width=600")
     options.add_argument("--height=800")
     firefox_profile = webdriver.FirefoxProfile()

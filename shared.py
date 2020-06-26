@@ -39,6 +39,7 @@ PARAMS = get_params()
 DRIVER_PATH = CONFIG['constant']['driver_path']
 UPDATE_CACHE = bool(strtobool(CONFIG['constant']['update_cache']))
 SEND_MESSAGE = bool(strtobool(CONFIG['constant']['send_message']))
+HEADLESS = bool(strtobool(CONFIG['constant']['headless']))
 CACHE_DIR = CONFIG['constant']['cache_dir']
 CACHE_CURRENT_DIR = os.path.join(CACHE_DIR, 'current')
 CACHE_CHECKPOINT_DIR = os.path.join(CACHE_DIR, 'checkpoints')

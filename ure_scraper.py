@@ -24,7 +24,7 @@ def get_next(driver):
 
 def scrape():
     options = Options()
-    options.headless = True
+    options.headless = shared.HEADLESS
     options.add_argument("--width=" + shared.PARAMS['scrape']['width'])
     options.add_argument("--height=" + shared.PARAMS['scrape']['height'])
     firefox_profile = webdriver.FirefoxProfile()
@@ -67,7 +67,6 @@ def scrape():
         shared.wait_for_element_visible(driver, xpaths['square_feet_dropdown'])
         sqft_el = driver.find_element_by_xpath(xpaths['square_feet_dropdown'])
         driver.execute_script("arguments[0].scrollIntoView(true);", sqft_el)
-        # driver.execute_script("arguments[0].click();", sqft_el)
         Select(sqft_el).select_by_visible_text(shared.CONFIG['search']['square_feet_dropdown'])
         shared.wait_for_element_visible(driver, xpaths['acres_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['acres_dropdown'])).select_by_visible_text(
