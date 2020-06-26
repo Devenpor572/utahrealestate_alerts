@@ -46,7 +46,7 @@ def scrape():
     try:
         driver.set_page_load_timeout(int(shared.CONFIG['search']['driver_timeout']))
         driver.get(shared.CONFIG['search'][shared.SOURCE_KSL])
-        shared.wait_for_element(driver, '//*[@id="search-app"]')
+        shared.wait_for_element_visible(driver, '//*[@id="search-app"]')
         scroll_down(driver)
         sources = [driver.page_source]
     finally:
@@ -139,4 +139,5 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
+    # test()
+    pass

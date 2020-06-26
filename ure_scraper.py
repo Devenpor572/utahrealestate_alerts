@@ -13,9 +13,18 @@ import os
 import re
 
 
+def get_next(driver):
+    result = None
+    try:
+        result = shared.wait_for_element_visible(driver, shared.PARAMS['xpath']['next_button'], 3)
+    except:
+        pass
+    return result
+
+
 def scrape():
     options = Options()
-    options.headless = False
+    options.headless = True
     options.add_argument("--width=" + shared.PARAMS['scrape']['width'])
     options.add_argument("--height=" + shared.PARAMS['scrape']['height'])
     firefox_profile = webdriver.FirefoxProfile()
@@ -31,62 +40,49 @@ def scrape():
     try:
         driver.set_page_load_timeout(int(shared.CONFIG['search']['driver_timeout']))
         driver.get(shared.PARAMS['scrape']['ure'])
-
         xpaths = shared.PARAMS['xpath']
-
-        shared.medium_sleep()
-        shared.wait_for_element(driver, xpaths['geolocation'])
+        shared.wait_for_element_visible(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(shared.CONFIG['search']['geolocation'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['geolocation'])
+        shared.wait_for_element_visible(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
-        shared.medium_sleep()
         results = driver.find_elements_by_xpath(xpaths['cookie_close_banner'])
         if results and len(results) == 1:
             driver.execute_script("arguments[0].click();", results[0])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['filter'])
+        shared.wait_for_element_visible(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
         driver.execute_script("arguments[0].click();", filter_el)
-        shared.medium_sleep()
-        shared.wait_for_element(driver, xpaths['min_price'])
+        shared.wait_for_element_visible(driver, xpaths['min_price'])
         driver.find_element_by_xpath(xpaths['min_price']).send_keys(shared.CONFIG['search']['min_price'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['max_price'])
+        shared.wait_for_element_visible(driver, xpaths['max_price'])
         driver.find_element_by_xpath(xpaths['max_price']).send_keys(shared.CONFIG['search']['max_price'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['bedrooms_dropdown'])
+        shared.wait_for_element_visible(driver, xpaths['bedrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bedrooms_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['bedrooms_dropdown'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['bathrooms_dropdown'])
+        shared.wait_for_element_visible(driver, xpaths['bathrooms_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['bathrooms_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['bathrooms_dropdown'])
-        shared.short_sleep()
         shared.wait_for_element(driver, xpaths['under_contract_checkbox'])
         under_contract_element = driver.find_element_by_xpath(xpaths['under_contract_checkbox'])
         driver.execute_script("arguments[0].click();", under_contract_element)
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['square_feet_dropdown'])
+        shared.wait_for_element_visible(driver, xpaths['square_feet_dropdown'])
         sqft_el = driver.find_element_by_xpath(xpaths['square_feet_dropdown'])
-        driver.execute_script("arguments[0].click();", sqft_el)
+        driver.execute_script("arguments[0].scrollIntoView(true);", sqft_el)
+        # driver.execute_script("arguments[0].click();", sqft_el)
         Select(sqft_el).select_by_visible_text(shared.CONFIG['search']['square_feet_dropdown'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['acres_dropdown'])
+        shared.wait_for_element_visible(driver, xpaths['acres_dropdown'])
         Select(driver.find_element_by_xpath(xpaths['acres_dropdown'])).select_by_visible_text(
             shared.CONFIG['search']['acres_dropdown'])
-        shared.short_sleep()
-        shared.wait_for_element(driver, xpaths['update_search'])
+        shared.wait_for_element_visible(driver, xpaths['update_search'])
         update_search = driver.find_element_by_xpath(xpaths['update_search'])
         driver.execute_script("arguments[0].click();", update_search)
-        shared.medium_sleep()
+        shared.wait_for_element_visible(driver, xpaths['results_listings'])
         page_sources = [driver.page_source]
-        results = driver.find_elements_by_xpath(xpaths['next_button'])
-        while results:
-            driver.execute_script("arguments[0].click();", results[0])
-            shared.medium_sleep()
+        result = get_next(driver)
+        while result:
+            driver.execute_script("arguments[0].click();", result)
+            shared.wait_for_element_visible(driver, xpaths['results_listings'])
             page_sources.append(driver.page_source)
-            results = driver.find_elements_by_xpath(xpaths['next_button'])
+            result = get_next(driver)
     finally:
         driver.quit()
     return page_sources
@@ -193,5 +189,24 @@ def test():
     assert extract_value('2414.241+') == 2414.241
 
 
+def perf_test():
+    import time
+    import traceback
+    fail_count = 0
+    attempts = 100
+    for i in range(attempts):
+        try:
+            print(f'{i:03} begin')
+            scrape()
+            print(f'{i:03} success')
+        except:
+            fail_count += 1
+            print(f'{i:03} fail: {traceback.format_exc()}')
+        time.sleep(30)
+    print(f'{attempts} attempts; {fail_count} failures; {100*((attempts-fail_count)/float(attempts)):2f}% success rate')
+
+
 if __name__ == '__main__':
-    test()
+    # test()
+    # perf_test()
+    pass

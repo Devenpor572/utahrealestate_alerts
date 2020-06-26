@@ -138,9 +138,18 @@ def make_checkpoint(file, directory):
     remove_old_files(directory)
 
 
-def wait_for_element(web_driver, xpath):
-    WebDriverWait(web_driver, 60).until(
+def wait_for_element(web_driver, xpath, timeout=60):
+    return WebDriverWait(web_driver, timeout).until(
         expected_conditions.presence_of_element_located((By.XPATH, xpath)))
+
+
+def wait_for_visible(web_driver, element, timeout=60):
+    WebDriverWait(web_driver, timeout).until(expected_conditions.visibility_of(element))
+
+
+def wait_for_element_visible(web_driver, xpath, timeout=60):
+    element = wait_for_element(web_driver, xpath, timeout)
+    wait_for_visible(web_driver, element, timeout)
 
 
 def short_sleep():
