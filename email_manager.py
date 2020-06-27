@@ -18,23 +18,16 @@ def format_html_listing(el, listing, optional=None):
     link_el.text = shared.PARAMS['str'][listing.source] + str(listing.mls_id)
     list_el = ET.SubElement(el, 'ul')
     if optional:
-        optional_el = ET.SubElement(list_el, 'li')
-        strong_el = ET.SubElement(optional_el, 'strong')
-        strong_el.text = optional
-    status_el = ET.SubElement(list_el, 'li')
-    status_el.text = 'Status: {}'.format(listing.status)
-    price_el = ET.SubElement(list_el, 'li')
+        ET.SubElement(ET.SubElement(list_el, 'li'), 'strong').text = optional
+    ET.SubElement(list_el, 'li').text = 'Status: {}'.format(listing.status)
     if listing.open_house:
-        open_house_el = ET.SubElement(list_el, 'li')
-        open_house_el.text = listing.open_house
-    price_el.text = 'Price: ${:,}'.format(listing.price)
-    address_el = ET.SubElement(list_el, 'li')
-    address_el.text = 'Address: {}'.format(listing.address)
-    details_el = ET.SubElement(list_el, 'li')
-    details_el.text = '{} SqFt • {} Bds • {} Ba '.format(listing.sqft, listing.bedrooms, listing.bathrooms)
-    details_el = ET.SubElement(list_el, 'li')
+        ET.SubElement(list_el, 'li').text = listing.open_house
+    ET.SubElement(list_el, 'li').text = 'Price: ${:,}'.format(listing.price)
+    ET.SubElement(list_el, 'li').text = 'Address: {}'.format(listing.address)
+    ET.SubElement(list_el, 'li').text = '{} SqFt • {} Bds • {} Ba '.format(
+        listing.sqft, listing.bedrooms, listing.bathrooms)
     if listing.agent:
-        details_el.text = 'Agent: {}'.format(listing.agent)
+        ET.SubElement(list_el, 'li').text = 'Agent: {}'.format(listing.agent)
     return el
 
 
@@ -60,7 +53,7 @@ def format_html_search_parameters(el):
     ksl_subtitle_el.text = 'KSL Classifieds - '
     ET.SubElement(ksl_subtitle_el, 'a', {'href': shared.CONFIG['search']['ksl']}).text = 'Link'
     ET.SubElement(ET.SubElement(el, 'p'), 'small').text = \
-        'Note: There may be duplicates between KSL and Utah Real Estate'
+        'Note: Listings on KSL classifieds may be redundant with listings on UtahRealEstate.com'
     return el
 
 

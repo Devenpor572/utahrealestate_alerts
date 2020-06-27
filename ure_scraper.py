@@ -46,7 +46,7 @@ def scrape():
         shared.wait_for_element_visible(driver, xpaths['geolocation'])
         driver.find_element_by_xpath(xpaths['geolocation']).send_keys(Keys.RETURN)
         results = driver.find_elements_by_xpath(xpaths['cookie_close_banner'])
-        if results and len(results) == 1:
+        if results:
             driver.execute_script("arguments[0].click();", results[0])
         shared.wait_for_element_visible(driver, xpaths['filter'])
         filter_el = driver.find_element_by_xpath(xpaths['filter'])
