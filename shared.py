@@ -81,11 +81,15 @@ def make_dirs(directories):
 make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR, EXTENSIONS_DIR])
 
 
+def date_stamp():
+    return datetime.datetime.now().replace(microsecond=0).strftime('%y%m%d')
+
+
 def timestamp():
     return datetime.datetime.now().replace(microsecond=0).strftime('%y%m%dT%H%M%S')
 
 
-CONST_TIMESTAMP = timestamp()
+CONST_DATE_STAMP = date_stamp()
 g_timestamp = timestamp()
 
 
@@ -104,7 +108,7 @@ def sleep_norm_dist(mu, sigma, min):
 
 
 def log_message(msg):
-    log_path = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(CONST_TIMESTAMP))
+    log_path = os.path.join(CONFIG['constant']['log_dir'], '{}.txt'.format(CONST_DATE_STAMP))
     if type(msg) != str:
         msg = str(msg)
     full_msg = timestamp() + ' - ' + msg
