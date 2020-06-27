@@ -59,6 +59,8 @@ def format_html_search_parameters(el):
     ksl_subtitle_el = ET.SubElement(ksl_li_el, 'h4')
     ksl_subtitle_el.text = 'KSL Classifieds - '
     ET.SubElement(ksl_subtitle_el, 'a', {'href': shared.CONFIG['search']['ksl']}).text = 'Link'
+    ET.SubElement(ET.SubElement(el, 'p'), 'small').text = \
+        'Note: There may be duplicates between KSL and Utah Real Estate'
     return el
 
 
