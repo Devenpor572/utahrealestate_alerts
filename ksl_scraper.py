@@ -9,6 +9,7 @@ import money_parser
 
 import os
 import re
+import time
 
 
 # https://stackoverflow.com/questions/48850974/selenium-scroll-to-end-of-page-in-dynamically-loading-webpage
@@ -20,7 +21,7 @@ def scroll_down(driver):
         # Scroll down to the bottom.
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         # Wait to load the page.
-        shared.short_sleep()
+        time.sleep(15)
         # Calculate new scroll height and compare with last scroll height.
         new_height = driver.execute_script("return document.body.scrollHeight")
         if new_height == last_height:
