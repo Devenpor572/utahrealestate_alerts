@@ -22,7 +22,6 @@ def get_next(driver):
     return result
 
 
-
 def scrape():
     options = Options()
     options.headless = shared.HEADLESS

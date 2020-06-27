@@ -33,7 +33,8 @@ def format_html_listing(el, listing, optional=None):
     details_el = ET.SubElement(list_el, 'li')
     details_el.text = '{} SqFt • {} Bds • {} Ba '.format(listing.sqft, listing.bedrooms, listing.bathrooms)
     details_el = ET.SubElement(list_el, 'li')
-    details_el.text = 'Agent: {}'.format(listing.agent)
+    if listing.agent:
+        details_el.text = 'Agent: {}'.format(listing.agent)
     return el
 
 

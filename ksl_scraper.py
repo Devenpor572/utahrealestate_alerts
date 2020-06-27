@@ -110,7 +110,7 @@ def parse_html(source):
         bedrooms = int(re.match(r'(\d+) beds \|.*', bed_bath_str).group(1))
         bathrooms = int(round(float(re.match(r'.*\| (\d+\.?\d*) baths', bed_bath_str).group(1))))
         sqft = int(re.match(r'(\d+) sq\. ft\.', listing_el.select_one('.Listing-squareFeet').text).group(1))
-        listing_agent = 'By owner'
+        listing_agent = ''
         open_house = ''
         # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house']
         listing = shared.MLS(unique_id, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house, shared.SOURCE_KSL)
