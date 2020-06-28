@@ -143,6 +143,14 @@ def make_checkpoint(file, directory):
     remove_old_files(directory)
 
 
+def short_sleep():
+    sleep_norm_dist(3, 0.5, 1)
+
+
+def medium_sleep():
+    sleep_norm_dist(10, 1, 5)
+
+
 def wait_for_element(web_driver, xpath, timeout=60):
     return WebDriverWait(web_driver, timeout).until(
         expected_conditions.presence_of_element_located((By.XPATH, xpath)))
@@ -162,12 +170,19 @@ def wait_for_invisible(web_driver, xpath, timeout=60):
         expected_conditions.invisibility_of_element_located((By.XPATH, xpath)))
 
 
-def short_sleep():
-    sleep_norm_dist(3, 0.5, 1)
-
-
-def medium_sleep():
-    sleep_norm_dist(10, 1, 5)
+def wait_for_loader(web_driver, xpath, timeout=60):
+    try:
+        WebDriverWait(web_driver, 1).until(
+            expected_conditions.presence_of_element_located((By.XPATH, xpath)))
+    except:
+        # Swallow exception because we probably missed the loader
+        # or we're at the end of the page
+        pass
+    WebDriverWait(web_driver, timeout).until(
+        expected_conditions.invisibility_of_element_located((By.XPATH, xpath)))
+    # Hard sleep to adjust for discrepancy between
+    # loader disappearing and page updating
+    time.sleep(1)
 
 
 def format_listings(listings):
