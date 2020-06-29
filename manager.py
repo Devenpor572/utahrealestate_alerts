@@ -70,13 +70,16 @@ def send_email(current, current_dict, previous, previous_dict):
             shared.log_message(prepend + message)
             more_available_ids[existing_id] = message
         # If the listing has had a price drop
-        elif current[1][existing_id].price < previous[1][existing_id].price:
+        elif current[1][existing_id].price < previous[1][existing_id].price \
+                and current[1][existing_id].status not in [shared.UNDER_CONTRACT, shared.OFF_MARKET]:
             message = 'Price Drop: ${:,} -> ${:,}'.format(previous[1][existing_id].price,
                                                           current[1][existing_id].price)
             shared.log_message(prepend + message)
             price_drop_ids[existing_id] = message
         # If the listing has a new open house
-        elif current[1][existing_id].open_house and not previous[1][existing_id].open_house:
+        elif current[1][existing_id].open_house \
+                and not previous[1][existing_id].open_house \
+                and current[1][existing_id].status not in [shared.UNDER_CONTRACT, shared.OFF_MARKET]:
             message = 'New open house: {}'.format(current[1][existing_id].open_house)
             shared.log_message(prepend + message)
             open_house_ids[existing_id] = message

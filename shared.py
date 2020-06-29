@@ -72,6 +72,26 @@ MLS = recordclass('MLS', ['mls_id',
                           'source'])
 
 
+def prettify_mls_str(mls):
+    mls_str = ''
+    if mls.source == SOURCE_URE:
+        mls_str += 'Utah Real Estate'
+    elif mls.source == SOURCE_KSL:
+        mls_str += 'KSL Classifieds'
+    else:
+        raise ValueError(f'MLS {mls.mls_id} has unknown source {mls.source}')
+    mls_str += f' #{mls.mls_id}\n'
+    mls_str += f'\tAddress: "{mls.address}"\n'
+    mls_str += f'\tPrice: "{mls.price}"\n'
+    mls_str += f'\tStatus: "{mls.status}"\n'
+    mls_str += f'\tBedrooms: "{mls.bedrooms}"\n'
+    mls_str += f'\tBathrooms: "{mls.bathrooms}"\n'
+    mls_str += f'\tSquare feet: "{mls.sqft}"\n'
+    mls_str += f'\tAgent: "{mls.agent}"\n'
+    mls_str += f'\tOpen House: "{mls.open_house}"'
+    return mls_str
+
+
 def make_dirs(directories):
     for directory in directories:
         if not os.path.exists(directory):
@@ -172,7 +192,7 @@ def wait_for_invisible(web_driver, xpath, timeout=60):
 
 def wait_for_loader(web_driver, xpath, timeout=60):
     try:
-        WebDriverWait(web_driver, 1).until(
+        WebDriverWait(web_driver, int(PARAMS['constant']['loader_wait_timeout'])).until(
             expected_conditions.presence_of_element_located((By.XPATH, xpath)))
     except:
         # Swallow exception because we probably missed the loader
@@ -182,7 +202,7 @@ def wait_for_loader(web_driver, xpath, timeout=60):
         expected_conditions.invisibility_of_element_located((By.XPATH, xpath)))
     # Hard sleep to adjust for discrepancy between
     # loader disappearing and page updating
-    time.sleep(1)
+    time.sleep(int(PARAMS['constant']['loader_wait_timeout']))
 
 
 def format_listings(listings):

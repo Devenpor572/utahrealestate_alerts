@@ -181,12 +181,19 @@ def get_mls_listings():
 
 
 def test():
-    assert extract_value('0.20+') == 0.2
-    assert extract_value('.20+') == 0.2
-    assert extract_value('1500+') == 1500
-    assert extract_value('3+') == 3
-    assert extract_value('2+') == 2
-    assert extract_value('2414.241+') == 2414.241
+    import time
+    shared.log_message('Begin KSL_scraper')
+    start = time.time()
+    update_cache()
+    end = time.time()
+    shared.log_message(f'Update cache: {end - start:.2f} seconds')
+    start = time.time()
+    listings = parse_cache()
+    end = time.time()
+    shared.log_message(f'Parse cache: {end - start:.2f} seconds')
+    for listing in listings:
+        shared.log_message(shared.prettify_mls_str(listing))
+    shared.log_message('End KSL_scraper')
 
 
 def perf_test():
@@ -207,6 +214,4 @@ def perf_test():
 
 
 if __name__ == '__main__':
-    # test()
-    # perf_test()
-    pass
+    test()

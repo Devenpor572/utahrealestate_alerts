@@ -77,6 +77,11 @@ def extract_value(value):
     return float(matches.group(1))
 
 
+def extract_results_count(results_str):
+    matches = re.match(r'^(\d+)\s.*$', results_str)
+    return int(matches.group(1))
+
+
 def validate_listing(listing):
     min_price = int(shared.CONFIG['search']['min_price'])
     if listing.price < min_price:
@@ -98,6 +103,8 @@ def validate_listing(listing):
 def parse_html(source):
     mls_listings = []
     soup = BeautifulSoup(source, 'html.parser')
+    results_count_el = soup.select_one(shared.PARAMS['selector']['results_count'])
+    expected_count = extract_results_count(results_count_el.text)
     count = 0
     for listing_el in soup.select('.Listing'):
         if 'id' not in listing_el.attrs:
@@ -119,6 +126,8 @@ def parse_html(source):
         mls_listings.append(listing)
     if count == 0:
         raise ValueError('No listings found')
+    if count != expected_count:
+        raise ValueError(f'Results count ({count}) does not equal expected count ({expected_count})')
     return mls_listings
 
 
@@ -136,9 +145,20 @@ def get_mls_listings():
 
 
 def test():
+    import time
+    shared.log_message('Begin KSL_scraper')
+    start = time.time()
     update_cache()
+    end = time.time()
+    shared.log_message(f'Update cache: {end-start:.2f} seconds')
+    start = time.time()
+    listings = parse_cache()
+    end = time.time()
+    shared.log_message(f'Parse cache: {end-start:.2f} seconds')
+    for listing in listings:
+        shared.log_message(shared.prettify_mls_str(listing))
+    shared.log_message('End KSL_scraper')
 
 
 if __name__ == '__main__':
     test()
-
