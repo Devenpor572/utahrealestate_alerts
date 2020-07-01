@@ -24,7 +24,8 @@ def create_db():
           'sqft INT, ' \
           'agent VARCHAR(255), ' \
           'open_house VARCHAR(255),' \
-          'source VARCHAR(255)' \
+          'source VARCHAR(255),' \
+          'image_url TEXT' \
           ');'
     conn.execute(sql)
     conn.commit()
@@ -33,14 +34,14 @@ def create_db():
 
 def insert_row(row):
     conn = sqlite3.connect(shared.DB)
-    conn.execute('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?)', row)
+    conn.execute('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?,?)', row)
     conn.commit()
     conn.close()
 
 
 def insert_rows(rows):
     conn = sqlite3.connect(shared.DB)
-    conn.executemany('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?)', rows)
+    conn.executemany('INSERT INTO mls VALUES (?,?,?,?,?,?,?,?,?,?,?)', rows)
     conn.commit()
     conn.close()
 
@@ -57,7 +58,8 @@ def update_row(row):
           "sqft='{6}', " \
           "agent='{7}', " \
           "open_house='{8}', "\
-          "source='{9}' "\
+          "source='{9}', "\
+          "image_url='{10}' "\
           "WHERE mls_id='{0}'".format(*row)
     conn.execute(sql)
     conn.commit()

@@ -1,8 +1,12 @@
+import image_manager
 import shared
 
 from datetime import datetime
+from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import make_msgid
+import mimetypes
 import smtplib
 import ssl
 import xml.dom.minidom
@@ -13,10 +17,23 @@ def current_time():
     return datetime.now().strftime("%b %d %Y @ %I:%M %p")
 
 
+def attach_images(message, image_cids):
+    for image_url, image_cid in image_cids.items():
+        filename, image_data = image_manager.load_image(image_url)
+        # Find the Content-Type of the image
+        maintype, subtype = mimetypes.guess_type(filename)[0].split('/')
+        message_image = MIMEImage(image_data, subtype)
+        message_image.add_header('Content-ID', image_cid)
+        message.attach(message_image)
+
+
 def format_html_listing(el, listing, optional=None):
+    image_cid = make_msgid(domain=shared.DOMAIN_DICT[listing.source])
+    ET.SubElement(el, 'img', {'src': f'cid:{image_cid[1:-1]}'})
+    ET.SubElement(el, 'br')
     link_el = ET.SubElement(el, 'a', {'href': shared.PARAMS['str'][listing.source] + str(listing.mls_id)})
     link_el.text = shared.PARAMS['str'][listing.source] + str(listing.mls_id)
-    list_el = ET.SubElement(el, 'ul')
+    list_el = ET.SubElement(el, 'ul', {'style': 'list-style-type: none;'})
     if optional:
         ET.SubElement(ET.SubElement(list_el, 'li'), 'strong').text = optional
     ET.SubElement(list_el, 'li').text = 'Status: {}'.format(listing.status)
@@ -28,7 +45,7 @@ def format_html_listing(el, listing, optional=None):
         listing.sqft, listing.bedrooms, listing.bathrooms)
     if listing.agent:
         ET.SubElement(list_el, 'li').text = 'Agent: {}'.format(listing.agent)
-    return el
+    return {listing.image_url: image_cid}
 
 
 def format_html_search_parameters(el):
@@ -64,48 +81,50 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
     html_el = ET.Element('html')
     body_el = ET.SubElement(html_el, 'body')
     text = ''
+    image_cids = dict()
     if new_listing_ids:
         text += 'New in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'New in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul')
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
         for new_mls_num in new_listing_ids:
             text += '\n - ' + shared.PARAMS['str'][listings[new_mls_num].source] + str(new_mls_num)
             li = ET.SubElement(list_el, 'li')
-            format_html_listing(li, listings[new_mls_num])
+            image_cids.update(format_html_listing(li, listings[new_mls_num]))
     if more_available_ids:
         text += 'Available again in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Available again in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul')
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
         for more_availabe_id in more_available_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[more_availabe_id].source] + str(more_availabe_id)
             text += '\n\t - ' + more_available_ids[more_availabe_id]
             li = ET.SubElement(list_el, 'li')
-            format_html_listing(li, listings[more_availabe_id], more_available_ids[more_availabe_id])
+            image_cids.update(format_html_listing(li, listings[more_availabe_id], more_available_ids[more_availabe_id]))
     if price_drop_ids:
         text += 'Price drop in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Price drop in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul')
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
         for price_drop_id in price_drop_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[price_drop_id].source] + str(price_drop_id)
             text += '\n\t - ' + price_drop_ids[price_drop_id]
             li = ET.SubElement(list_el, 'li')
-            format_html_listing(li, listings[price_drop_id], price_drop_ids[price_drop_id])
+            image_cids.update(format_html_listing(li, listings[price_drop_id], price_drop_ids[price_drop_id]))
     if open_house_ids:
         text += 'Open house in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Open house in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul')
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
         for open_house_id in open_house_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[open_house_id].source] + str(open_house_id)
             text += '\n\t - ' + open_house_ids[open_house_id]
             li = ET.SubElement(list_el, 'li')
-            format_html_listing(li, listings[open_house_id], open_house_ids[open_house_id])
+            image_cids.update(format_html_listing(li, listings[open_house_id], open_house_ids[open_house_id]))
     format_html_search_parameters(body_el)
     message.attach(MIMEText(text, "plain"))
     message.attach(MIMEText(xml.dom.minidom.parseString(ET.tostring(html_el)).toprettyxml(), "html"))
+    attach_images(message, image_cids)
     return message
 
 
@@ -119,6 +138,7 @@ def send_email(message):
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(shared.CONFIG['email']['from'], shared.CONFIG['email']['password'])
+            shared.log_message('\n' + message.as_string())
             server.sendmail(message['From'], recipients, message.as_string())
         shared.log_message('Email sent')
     else:

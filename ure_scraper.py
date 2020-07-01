@@ -157,9 +157,11 @@ def parse_html(source):
         address = property_details.select_one(shared.PARAMS['selector']['address']).text.strip()
         address = " ".join(address.split())
         listing_agent = property_details.select_one(shared.PARAMS['selector']['listing_agent']).text.strip()
-        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house', 'source']
+        image_url = property_card.select_one(shared.PARAMS['selector']['listing_img_ure']).attrs['src']
+        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house', 'source',
+        # 'image_url']
         listing = shared.MLS(mls, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house,
-                             shared.SOURCE_URE)
+                             shared.SOURCE_URE, image_url)
         validate_listing(listing)
         mls_listings.append(listing)
     if count == 0:

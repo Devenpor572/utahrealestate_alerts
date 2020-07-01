@@ -48,6 +48,7 @@ DB = os.path.join(DB_DIR, 'mls.db')
 DB_CHECKPOINT_DIR = os.path.join(DB_DIR, 'checkpoints')
 CHECKPOINT_COUNT = int(CONFIG['constant']['checkpoint_count'])
 EXTENSIONS_DIR = CONFIG['search']['extensions_dir']
+IMAGE_DIR = CONFIG['constant']['image_dir']
 
 ACTIVE = PARAMS['str']['active']
 BACKUP_OFFER = PARAMS['str']['backup_offer']
@@ -57,6 +58,7 @@ STATUSES = [ACTIVE, BACKUP_OFFER, UNDER_CONTRACT, OFF_MARKET]
 
 SOURCE_URE = 'ure'
 SOURCE_KSL = 'ksl'
+DOMAIN_DICT = {SOURCE_URE: 'utahrealestate.com', SOURCE_KSL: 'homes.ksl.com'}
 CACHE_CURRENT_URE_DIR = os.path.join(CACHE_CURRENT_DIR, SOURCE_URE)
 CACHE_CURRENT_KSL_DIR = os.path.join(CACHE_CURRENT_DIR, SOURCE_KSL)
 
@@ -69,7 +71,8 @@ MLS = recordclass('MLS', ['mls_id',
                           'sqft',
                           'agent',
                           'open_house',
-                          'source'])
+                          'source',
+                          'image_url'])
 
 
 def prettify_mls_str(mls):
@@ -89,6 +92,7 @@ def prettify_mls_str(mls):
     mls_str += f'\tSquare feet: "{mls.sqft}"\n'
     mls_str += f'\tAgent: "{mls.agent}"\n'
     mls_str += f'\tOpen House: "{mls.open_house}"'
+    mls_str += f'\tImage URL: "{mls.image_url}"'
     return mls_str
 
 
@@ -98,7 +102,7 @@ def make_dirs(directories):
             os.makedirs(directory)
 
 
-make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR, EXTENSIONS_DIR])
+make_dirs([CACHE_DIR, CACHE_CURRENT_DIR, CACHE_CHECKPOINT_DIR, DB_DIR, DB_CHECKPOINT_DIR, CACHE_CURRENT_URE_DIR, CACHE_CURRENT_KSL_DIR, EXTENSIONS_DIR, IMAGE_DIR])
 
 
 def date_stamp():

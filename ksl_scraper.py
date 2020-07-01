@@ -120,8 +120,11 @@ def parse_html(source):
         sqft = int(re.match(r'(\d+) sq\. ft\.', listing_el.select_one('.Listing-squareFeet').text).group(1))
         listing_agent = ''
         open_house = ''
-        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house']
-        listing = shared.MLS(unique_id, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent, open_house, shared.SOURCE_KSL)
+        image_url = listing_el.select_one(shared.PARAMS['selector']['photo_image_ksl']).attrs['src']
+        # ['mls', 'address', 'price', 'status', 'bedrooms', 'bathrooms', 'sqft', 'agent', 'open_house', 'source',
+        # 'image_url']
+        listing = shared.MLS(unique_id, address, list_price, status, bedrooms, bathrooms, sqft, listing_agent,
+                             open_house, shared.SOURCE_KSL, image_url)
         validate_listing(listing)
         mls_listings.append(listing)
     if count == 0:
