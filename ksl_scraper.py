@@ -129,7 +129,7 @@ def parse_html(source):
         mls_listings.append(listing)
     if count == 0:
         raise ValueError('No listings found')
-    if count != expected_count:
+    if count < expected_count:
         raise ValueError(f'Results count ({count}) does not equal expected count ({expected_count})')
     return mls_listings
 
