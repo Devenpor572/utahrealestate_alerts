@@ -33,10 +33,11 @@ def format_html_listing(el, listing, optional=None):
     ET.SubElement(el, 'br')
     link_el = ET.SubElement(el, 'a', {'href': shared.PARAMS['str'][listing.source] + str(listing.mls_id)})
     link_el.text = shared.PARAMS['str'][listing.source] + str(listing.mls_id)
-    list_el = ET.SubElement(el, 'ul', {'style': 'list-style-type: none;'})
+    list_el = ET.SubElement(el, 'ul', {'style': 'list-style-type: none; '})
     if optional:
         ET.SubElement(ET.SubElement(list_el, 'li'), 'strong').text = optional
-    ET.SubElement(list_el, 'li').text = 'Status: {}'.format(listing.status)
+    if listing.status != shared.ACTIVE:
+        ET.SubElement(list_el, 'li').text = 'Status: {}'.format(listing.status)
     if listing.open_house:
         ET.SubElement(list_el, 'li').text = listing.open_house
     ET.SubElement(list_el, 'li').text = 'Price: ${:,}'.format(listing.price)
@@ -51,14 +52,14 @@ def format_html_listing(el, listing, optional=None):
 def format_html_search_parameters(el):
     ET.SubElement(el, 'hr')
     ET.SubElement(el, 'h3').text = 'Search parameters'
-    search_params_ul_el = ET.SubElement(el, 'ul')
+    search_params_ul_el = ET.SubElement(el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
     ure_li_el = ET.SubElement(search_params_ul_el, 'li')
     ure_subtitle_el = ET.SubElement(ure_li_el, 'h4')
     ure_subtitle_el.text = 'Utah Real Estate - '
     ure_a_el = ET.SubElement(ure_subtitle_el, 'a', {'href': shared.PARAMS['scrape']['ure']})
     ure_a_el.text = 'Link'
-    ure_details_ul_el = ET.SubElement(ure_li_el, 'ul')
-    ET.SubElement(ure_details_ul_el, 'li').text = f'Location query: {shared.CONFIG["search"]["geolocation"]}'
+    ure_details_ul_el = ET.SubElement(ure_li_el, 'ul', {'style': 'list-style-type: none;'})
+    ET.SubElement(ure_details_ul_el, 'li').text = f'Location Query: {shared.CONFIG["search"]["geolocation"]}'
     ET.SubElement(ure_details_ul_el, 'li').text = f'Min Price: {shared.CONFIG["search"]["min_price"]}'
     ET.SubElement(ure_details_ul_el, 'li').text = f'Max Price: {shared.CONFIG["search"]["max_price"]}'
     ET.SubElement(ure_details_ul_el, 'li').text = f'Bedrooms: {shared.CONFIG["search"]["bedrooms_dropdown"]}'
@@ -70,7 +71,9 @@ def format_html_search_parameters(el):
     ksl_subtitle_el.text = 'KSL Classifieds - '
     ET.SubElement(ksl_subtitle_el, 'a', {'href': shared.CONFIG['search']['ksl']}).text = 'Link'
     ET.SubElement(ET.SubElement(el, 'p'), 'small').text = \
-        'Note: Listings on KSL classifieds may be redundant with listings on UtahRealEstate.com'
+        'Note: Listings on KSL classifieds may be redundant with listings on UtahRealEstate.com. '\
+        'New listings may be older listings that now fit search criteria '\
+        '(i.e. the listing price dropped from above max price to within the range).'
     return el
 
 
@@ -86,7 +89,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         text += 'New in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'New in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for new_mls_num in new_listing_ids:
             text += '\n - ' + shared.PARAMS['str'][listings[new_mls_num].source] + str(new_mls_num)
             li = ET.SubElement(list_el, 'li')
@@ -95,7 +98,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         text += 'Available again in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Available again in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for more_availabe_id in more_available_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[more_availabe_id].source] + str(more_availabe_id)
             text += '\n\t - ' + more_available_ids[more_availabe_id]
@@ -105,7 +108,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         text += 'Price drop in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Price drop in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for price_drop_id in price_drop_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[price_drop_id].source] + str(price_drop_id)
             text += '\n\t - ' + price_drop_ids[price_drop_id]
@@ -115,7 +118,7 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
         text += 'Open house in Cache County, Utah:\n'
         title_el = ET.SubElement(body_el, 'h2')
         title_el.text = 'Open house in Cache County, Utah'
-        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none;'})
+        list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for open_house_id in open_house_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[open_house_id].source] + str(open_house_id)
             text += '\n\t - ' + open_house_ids[open_house_id]
