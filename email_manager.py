@@ -138,7 +138,6 @@ def send_email(message):
         context = ssl.create_default_context()
         with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
             server.login(shared.CONFIG['email']['from'], shared.CONFIG['email']['password'])
-            shared.log_message('\n' + message.as_string())
             server.sendmail(message['From'], recipients, message.as_string())
         shared.log_message('Email sent')
     else:
