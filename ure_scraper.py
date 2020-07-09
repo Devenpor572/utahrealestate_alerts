@@ -11,6 +11,7 @@ import money_parser
 
 import os
 import re
+import time
 
 
 def get_next(driver):
@@ -93,14 +94,18 @@ def match_cache_file(file):
 
 
 def update_cache():
+    shared.log_message('Begin URE update cache')
     if shared.UPDATE_CACHE:
+        start = time.time()
         sources = scrape()
+        end = time.time()
         for file in os.listdir(shared.CACHE_CURRENT_URE_DIR):
             os.remove(os.path.join(shared.CACHE_CURRENT_URE_DIR, file))
         for i, source in enumerate(sources):
             with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
                 file.write(source)
-        shared.log_message('URE cache updated')
+        shared.log_message(f'URE cache updated ({len(sources)} pages in {end - start:.2f} seconds) '
+                           f'under name {shared.g_timestamp}')
     else:
         shared.log_message('UPDATE_CACHE set to false')
 
@@ -108,6 +113,11 @@ def update_cache():
 def extract_value(value):
     matches = re.match(r'^(\d*\.?\d+)\+.*$', value)
     return float(matches.group(1))
+
+
+def extract_results_count(results_str):
+    matches = re.match(r'^([\d,]+)\s.*$', results_str)
+    return int(matches.group(1).replace(',', ''))
 
 
 def validate_listing(listing):
@@ -132,6 +142,8 @@ def parse_html(source):
     mls_listings = []
     soup = BeautifulSoup(source, 'html.parser')
     count = 0
+    results_count_el = soup.select_one(shared.PARAMS['selector']['results_count_ure'])
+    expected_count = extract_results_count(results_count_el.text)
     for property_card in soup.select(shared.PARAMS['selector']['property_card']):
         if not ('class' in property_card.attrs and
                 shared.PARAMS['selector']['property_card_class'] in property_card.attrs['class']):
@@ -166,15 +178,20 @@ def parse_html(source):
         mls_listings.append(listing)
     if count == 0:
         raise ValueError('No listings found')
+    if count < expected_count or (count == 500 and expected_count > 500):
+        raise ValueError(f'Results count ({count}) does not equal expected count ({expected_count})')
     return mls_listings
 
 
 def parse_cache():
+    shared.log_message('Begin URE parse cache')
     parsed_files = list()
     for filename in sorted(os.listdir(shared.CACHE_CURRENT_URE_DIR)):
         with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, filename), 'r') as file:
             parsed_files.append(parse_html(file.read()))
-    return [item for sublist in parsed_files for item in sublist]
+    listings = [item for sublist in parsed_files for item in sublist]
+    shared.log_message(f'KSL parse cache returned {len(listings)} listings')
+    return listings
 
 
 def get_mls_listings():
@@ -183,7 +200,6 @@ def get_mls_listings():
 
 
 def test():
-    import time
     shared.log_message('Begin KSL_scraper')
     start = time.time()
     update_cache()
@@ -199,7 +215,6 @@ def test():
 
 
 def perf_test():
-    import time
     import traceback
     fail_count = 0
     attempts = 100

@@ -176,6 +176,7 @@ def medium_sleep():
 
 
 def wait_for_element(web_driver, xpath, timeout=60):
+    time.sleep(1)
     return WebDriverWait(web_driver, timeout).until(
         expected_conditions.presence_of_element_located((By.XPATH, xpath)))
 

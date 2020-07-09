@@ -60,14 +60,18 @@ def match_cache_file(file):
 
 
 def update_cache():
+    shared.log_message('Begin KSL update cache')
     if shared.UPDATE_CACHE:
+        start = time.time()
         sources = scrape()
+        end = time.time()
         for file in os.listdir(shared.CACHE_CURRENT_KSL_DIR):
             os.remove(os.path.join(shared.CACHE_CURRENT_KSL_DIR, file))
         for i, source in enumerate(sources):
             with open(os.path.join(shared.CACHE_CURRENT_KSL_DIR, '{}_{}.html'.format(shared.g_timestamp, i)), 'w') as file:
                 file.write(source)
-        shared.log_message('KSL cache updated')
+        shared.log_message(f'KSL cache updated ({len(sources)} pages in {end - start:.2f} seconds) '
+                           f'under name {shared.g_timestamp}')
     else:
         shared.log_message('UPDATE_CACHE set to false')
 
@@ -78,7 +82,7 @@ def extract_value(value):
 
 
 def extract_results_count(results_str):
-    matches = re.match(r'^(\d+)\s.*$', results_str)
+    matches = re.match(r'^([\d,]+)\s.*$', results_str)
     return int(matches.group(1))
 
 
@@ -135,11 +139,14 @@ def parse_html(source):
 
 
 def parse_cache():
+    shared.log_message('Begin KSL parse cache')
     parsed_files = list()
     for filename in sorted(os.listdir(shared.CACHE_CURRENT_KSL_DIR)):
         with open(os.path.join(shared.CACHE_CURRENT_KSL_DIR, filename), 'r') as file:
             parsed_files.append(parse_html(file.read()))
-    return [item for sublist in parsed_files for item in sublist]
+    listings = [item for sublist in parsed_files for item in sublist]
+    shared.log_message(f'KSL parse cache returned {len(listings)} listings')
+    return listings
 
 
 def get_mls_listings():

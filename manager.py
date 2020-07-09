@@ -23,6 +23,7 @@ def update_db_new_listings(current, current_dict, previous, previous_dict):
     new_listing_ids = all_current - all_previous
     if new_listing_ids:
         db.insert_rows([current[1][new_mls_num] for new_mls_num in new_listing_ids])
+    return new_listing_ids
 
 
 def update_db_off_market(current, current_dict, previous, previous_dict):
@@ -35,6 +36,7 @@ def update_db_off_market(current, current_dict, previous, previous_dict):
             mls = previous[1][off_market_id]
             mls.status = shared.OFF_MARKET
             db.update_row(mls)
+    return off_market_ids
 
 
 def update_db(current, current_dict, previous, previous_dict):
@@ -97,13 +99,23 @@ def update_and_alert():
     current = shared.format_listings(results)
     current_dict = {key: shared.format_listings(value) for key, value in results_dict.items()}
     if db.db_exists():
+        shared.log_message(f'Begin update DB')
         previous, previous_dict = db.get_db_listings()
-        update_db_new_listings(current, current_dict, previous, previous_dict)
-        update_db_off_market(current, current_dict, previous, previous_dict)
+        new_listings = update_db_new_listings(current, current_dict, previous, previous_dict)
+        if new_listings:
+            shared.log_message(f'New listings added to DB: {", ".join([str(listing)for listing in new_listings])}')
+        else:
+            shared.log_message('No new listings added to DB')
+        off_market_ids = update_db_off_market(current, current_dict, previous, previous_dict)
+        if off_market_ids:
+            shared.log_message(f'Off market listings updated in DB: {", ".join([str(listing)for listing in off_market_ids])}')
+        else:
+            shared.log_message('No off market listings updated in DB')
         update_db(current, current_dict, previous, previous_dict)
         shared.log_message('Updated DB')
         send_email(current, current_dict, previous, previous_dict)
     else:
+        shared.log_message(f'Begin create DB, no file at "{shared.DB}"')
         db.create_db()
         db.insert_rows([value for key, value in current[1].items()])
         shared.log_message('Created DB')
@@ -118,9 +130,9 @@ def update():
     for i in range(5):
         try:
             shared.update_timestamp()
-            shared.log_message('Begin {}'.format(shared.g_timestamp))
+            shared.log_message('{s:{c}^{n}}'.format(s=' BEGIN {} '.format(shared.g_timestamp), n=40, c='*'))
             update_and_alert()
-            shared.log_message('End {}'.format(shared.g_timestamp))
+            shared.log_message('{s:{c}^{n}}'.format(s=' END {} '.format(shared.g_timestamp), n=40, c='*'))
             shared.make_checkpoint(shared.CACHE_CURRENT_DIR, shared.CACHE_CHECKPOINT_DIR)
             shared.make_checkpoint(shared.DB, shared.DB_CHECKPOINT_DIR)
             passed = True
