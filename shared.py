@@ -188,6 +188,7 @@ def wait_for_visible(web_driver, element, timeout=60):
 def wait_for_element_visible(web_driver, xpath, timeout=60):
     element = wait_for_element(web_driver, xpath, timeout)
     wait_for_visible(web_driver, element, timeout)
+    return element
 
 
 def wait_for_invisible(web_driver, xpath, timeout=60):

@@ -178,19 +178,23 @@ def parse_html(source):
         mls_listings.append(listing)
     if count == 0:
         raise ValueError('No listings found')
-    if count < expected_count or (count == 500 and expected_count > 500):
-        raise ValueError(f'Results count ({count}) does not equal expected count ({expected_count})')
-    return mls_listings
+    return expected_count, mls_listings
 
 
 def parse_cache():
     shared.log_message('Begin URE parse cache')
     parsed_files = list()
+    expected_count = 0
+    count = 0
     for filename in sorted(os.listdir(shared.CACHE_CURRENT_URE_DIR)):
         with open(os.path.join(shared.CACHE_CURRENT_URE_DIR, filename), 'r') as file:
-            parsed_files.append(parse_html(file.read()))
+            expected_count, mls_listings = parse_html(file.read())
+            count += len(mls_listings)
+            parsed_files.append(mls_listings)
+    if count < expected_count or (count == 500 and expected_count > 500):
+        raise ValueError(f'Results count ({count}) does not equal expected count ({expected_count})')
     listings = [item for sublist in parsed_files for item in sublist]
-    shared.log_message(f'KSL parse cache returned {len(listings)} listings')
+    shared.log_message(f'URE parse cache returned {len(listings)} listings')
     return listings
 
 
@@ -200,7 +204,7 @@ def get_mls_listings():
 
 
 def test():
-    shared.log_message('Begin KSL_scraper')
+    shared.log_message('Begin URE_scraper')
     start = time.time()
     update_cache()
     end = time.time()
@@ -211,7 +215,7 @@ def test():
     shared.log_message(f'Parse cache: {end - start:.2f} seconds')
     for listing in listings:
         shared.log_message(shared.prettify_mls_str(listing))
-    shared.log_message('End KSL_scraper')
+    shared.log_message('End URE_scraper')
 
 
 def perf_test():
