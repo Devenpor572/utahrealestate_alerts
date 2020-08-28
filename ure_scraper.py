@@ -17,7 +17,7 @@ import time
 def get_next(driver):
     result = None
     try:
-        result = shared.wait_for_element_visible(driver, shared.PARAMS['xpath']['next_button'], 3)
+        result = shared.wait_for_element_visible(driver, shared.PARAMS['xpath']['next_button'], 15)
     except:
         pass
     return result
