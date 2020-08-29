@@ -66,6 +66,7 @@ def send_email(current, current_dict, previous, previous_dict):
         prepend = 'MLS #{}: '.format(existing_id)
         # If the listing has become more available than previously
         if current[1][existing_id].status not in [shared.UNDER_CONTRACT, shared.OFF_MARKET] \
+                and previous[1][existing_id].status not in [shared.OFF_MARKET] \
                 and LISTING_STATE_DICT[current[1][existing_id].status] < LISTING_STATE_DICT[previous[1][existing_id].status]:
             message = 'Availability Change: {} -> {}'.format(previous[1][existing_id].status,
                                                              current[1][existing_id].status)
