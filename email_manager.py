@@ -86,18 +86,18 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
     text = ''
     image_cids = dict()
     if new_listing_ids:
-        text += 'New in Cache County, Utah:\n'
+        text += 'New:\n'
         title_el = ET.SubElement(body_el, 'h2')
-        title_el.text = 'New in Cache County, Utah'
+        title_el.text = 'New'
         list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for new_mls_num in new_listing_ids:
             text += '\n - ' + shared.PARAMS['str'][listings[new_mls_num].source] + str(new_mls_num)
             li = ET.SubElement(list_el, 'li')
             image_cids.update(format_html_listing(li, listings[new_mls_num]))
     if more_available_ids:
-        text += 'Available again in Cache County, Utah:\n'
+        text += 'Availability change:\n'
         title_el = ET.SubElement(body_el, 'h2')
-        title_el.text = 'Available again in Cache County, Utah'
+        title_el.text = 'Availability change'
         list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for more_availabe_id in more_available_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[more_availabe_id].source] + str(more_availabe_id)
@@ -105,9 +105,9 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
             li = ET.SubElement(list_el, 'li')
             image_cids.update(format_html_listing(li, listings[more_availabe_id], more_available_ids[more_availabe_id]))
     if price_drop_ids:
-        text += 'Price drop in Cache County, Utah:\n'
+        text += 'Price drop:\n'
         title_el = ET.SubElement(body_el, 'h2')
-        title_el.text = 'Price drop in Cache County, Utah'
+        title_el.text = 'Price drop'
         list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for price_drop_id in price_drop_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[price_drop_id].source] + str(price_drop_id)
@@ -115,9 +115,9 @@ def generate_email_msg(listings, new_listing_ids, more_available_ids, price_drop
             li = ET.SubElement(list_el, 'li')
             image_cids.update(format_html_listing(li, listings[price_drop_id], price_drop_ids[price_drop_id]))
     if open_house_ids:
-        text += 'Open house in Cache County, Utah:\n'
+        text += 'Open house:\n'
         title_el = ET.SubElement(body_el, 'h2')
-        title_el.text = 'Open house in Cache County, Utah'
+        title_el.text = 'Open house'
         list_el = ET.SubElement(body_el, 'ul', {'style': 'list-style-type: none; padding-left: 0; margin-left: 0; '})
         for open_house_id in open_house_ids.keys():
             text += '\n - ' + shared.PARAMS['str'][listings[open_house_id].source] + str(open_house_id)
